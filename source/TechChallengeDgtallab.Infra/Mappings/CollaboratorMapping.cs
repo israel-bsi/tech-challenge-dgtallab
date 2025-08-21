@@ -37,7 +37,7 @@ public class CollaboratorMapping : IEntityTypeConfiguration<Collaborator>
 
         builder.HasOne(c => c.Department)
             .WithMany()
-            .HasForeignKey("DepartmentId")
+            .HasForeignKey(c => c.DepartmentId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(c => c.CreatedAt)

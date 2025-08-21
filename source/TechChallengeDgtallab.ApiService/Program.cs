@@ -17,6 +17,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.ApplyDatabaseMigrations();
 app.MapDefaultEndpoints();
 app.UseSwagger();
 app.MapSwagger();

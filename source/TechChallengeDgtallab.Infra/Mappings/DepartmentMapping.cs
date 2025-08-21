@@ -9,7 +9,7 @@ public class DepartmentMapping : IEntityTypeConfiguration<Department>
     public void Configure(EntityTypeBuilder<Department> builder)
     {
         builder.ToTable(nameof(Department));
-        
+
         builder.HasKey(d => d.Id);
 
         builder.Property(d => d.Id)
@@ -23,12 +23,12 @@ public class DepartmentMapping : IEntityTypeConfiguration<Department>
 
         builder.HasOne(d => d.Manager)
             .WithMany()
-            .HasForeignKey("ManagerId")
+            .HasForeignKey(d => d.ManagerId)
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(d => d.SuperiorDepartment)
             .WithMany()
-            .HasForeignKey("SuperiorDepartmentId")
+            .HasForeignKey(d => d.SuperiorDepartmentId)
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.Property(d => d.IsActive)

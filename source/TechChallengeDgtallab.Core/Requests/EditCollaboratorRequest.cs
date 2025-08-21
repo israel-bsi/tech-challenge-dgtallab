@@ -12,7 +12,8 @@ public class EditCollaboratorRequest
     [Required(ErrorMessage = "O CPF é obrigatório")]
     public string Cpf { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "O Departamento é obrigatório")]
+    [Range(1, int.MaxValue, ErrorMessage = "O Departamento é obrigatório")]
     public int DepartmentId { get; set; }
+    public EditDepartmentRequest? DepartmentRequest { get; set; }
     public string? Rg { get; set; }
 }

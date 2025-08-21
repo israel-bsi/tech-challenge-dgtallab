@@ -7,23 +7,22 @@ using TechChallengeDgtallab.Core.Responses;
 namespace TechChallengeDgtallab.ApiService.Controllers;
 
 [ApiController]
-[Tags("Departamentos")]
-[Route("api/v1/department")]
-public class DepartmentController : ControllerBase
+[Tags("Colaboradores")]
+[Route("api/v1/collaborators")]
+public class CollaboratorsController : ControllerBase
 {
-    private readonly IDepartmentHandler _handler;
-
-    public DepartmentController(IDepartmentHandler handler)
+    private readonly ICollaboratorHandler _handler;
+    public CollaboratorsController(ICollaboratorHandler handler)
     {
         _handler = handler;
     }
 
     [HttpPost]
-    [EndpointSummary("Cria um novo departamento")]
-    [ProducesResponseType(typeof(DepartmentResponse), StatusCodes.Status201Created)]
+    [EndpointSummary("Cria um novo colaborador")]
+    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> AddAsync([FromBody] EditDepartmentRequest request)
+    public async Task<ActionResult> AddAsync([FromBody] EditCollaboratorRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState.CreateErrorResponse(request));
@@ -36,11 +35,11 @@ public class DepartmentController : ControllerBase
     }
 
     [HttpPut]
-    [EndpointSummary("Atualiza um departamento")]
-    [ProducesResponseType(typeof(DepartmentResponse), StatusCodes.Status200OK)]
+    [EndpointSummary("Atualiza um colaborador")]
+    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateAsync([FromBody] EditDepartmentRequest request)
+    public async Task<ActionResult> UpdateAsync([FromBody] EditCollaboratorRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState.CreateErrorResponse(request));
@@ -54,8 +53,8 @@ public class DepartmentController : ControllerBase
 
 
     [HttpGet("{id:int}")]
-    [EndpointSummary("Obtém um departamento pelo ID")]
-    [ProducesResponseType(typeof(DepartmentResponse), StatusCodes.Status200OK)]
+    [EndpointSummary("Obtém um colaborador pelo ID")]
+    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> GetByIdAsync([FromRoute] int id)
@@ -68,8 +67,8 @@ public class DepartmentController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [EndpointSummary("Deleta um departamento pelo ID")]
-    [ProducesResponseType(typeof(DepartmentResponse), StatusCodes.Status204NoContent)]
+    [EndpointSummary("Deleta um colaborador pelo ID")]
+    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteAsync(int id)
@@ -82,8 +81,8 @@ public class DepartmentController : ControllerBase
     }
 
     [HttpGet]
-    [EndpointSummary("Obtém todos os departamentos")]
-    [ProducesResponseType(typeof(PagedResponse<IEnumerable<DepartmentResponse>>), StatusCodes.Status200OK)]
+    [EndpointSummary("Obtém todos os colaboradores")]
+    [ProducesResponseType(typeof(PagedResponse<IEnumerable<CollaboratorResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> GetAllAsync([FromQuery] PagedRequest request)

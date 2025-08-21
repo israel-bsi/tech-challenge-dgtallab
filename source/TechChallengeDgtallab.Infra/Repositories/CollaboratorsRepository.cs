@@ -15,133 +15,54 @@ public class CollaboratorsRepository : ICollaboratorRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Response<CollaboratorResponse>> AddAsync(EditCollaboratorRequest request)
+    public async Task<Response<Collaborator>> AddAsync(Collaborator collaborator)
     {
-        try
-        {
-            var collaborator = new Collaborator
-            {
-                Name = request.Name,
-                Cpf = request.Cpf,
-                Rg = request.Rg,
-                DepartmentId = request.DepartmentId,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-            };
+        await _dbContext.Collaborators.AddAsync(collaborator);
+        await _dbContext.SaveChangesAsync();
 
-            await _dbContext.Collaborators.AddAsync(collaborator);
-            await _dbContext.SaveChangesAsync();
-
-            return new Response<CollaboratorResponse>(collaborator, 201, "Colaborador cadastrado com sucesso!");
-        }
-        catch (Exception e)
-        {
-            return new Response<CollaboratorResponse>(null, 500, e.Message);
-        }
+        return new Response<Collaborator>(collaborator);
     }
 
-    public async Task<Response<CollaboratorResponse>> UpdateAsync(EditCollaboratorRequest request)
+    public async Task<Response<Collaborator>> UpdateAsync(Collaborator collaborator)
     {
-        try
-        {
-            var collaborator = await _dbContext
-                .Collaborators
-                .FirstOrDefaultAsync(c => c.Id == request.Id);
-            if (collaborator is null)
-                return new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.");
+        _dbContext.Collaborators.Update(collaborator);
+        await _dbContext.SaveChangesAsync();
 
-            collaborator.Name = request.Name;
-            collaborator.Cpf = request.Cpf;
-            collaborator.Rg = request.Rg;
-            collaborator.DepartmentId = request.DepartmentId;
-            collaborator.UpdatedAt = DateTime.UtcNow;
-
-            _dbContext.Collaborators.Update(collaborator);
-            await _dbContext.SaveChangesAsync();
-
-            return new Response<CollaboratorResponse>(collaborator, 200, "Colaborador atualizado com sucesso!");
-        }
-        catch (Exception e)
-        {
-            return new Response<CollaboratorResponse>(null, 500, e.Message);
-        }
+        return new Response<Collaborator>(collaborator);
     }
 
-    public async Task<Response<CollaboratorResponse>> DeleteAsync(int id)
+    public async Task<Response<Collaborator>> DeleteAsync(Collaborator collaborator)
     {
-        try
-        {
-            var collaborator = await _dbContext
-                .Collaborators
-                .FirstOrDefaultAsync(c => c.Id == id);
+        _dbContext.Collaborators.Update(collaborator);
+        await _dbContext.SaveChangesAsync();
 
-            if (collaborator is null)
-                return new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.");
-
-            collaborator.IsActive = false;
-            collaborator.UpdatedAt = DateTime.UtcNow;
-
-            _dbContext.Collaborators.Update(collaborator);
-            await _dbContext.SaveChangesAsync();
-
-            return new Response<CollaboratorResponse>(null, 204, "Colaborador deletado com sucesso!");
-        }
-        catch (Exception e)
-        {
-            return new Response<CollaboratorResponse>(null, 500, e.Message);
-        }
+        return new Response<Collaborator>();
     }
 
-    public async Task<Response<CollaboratorResponse>> GetByIdAsync(int id)
+    public async Task<Response<Collaborator>> GetByIdAsync(int id)
     {
-        try
-        {
-            var collaborator = await _dbContext
-                .Collaborators
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == id && c.IsActive);
+        var collaborator = await _dbContext
+            .Collaborators
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive);
 
-            return collaborator is null 
-                ? new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.") 
-                : new Response<CollaboratorResponse>(collaborator, 200, "Colaborador encontrado com sucesso!");
-        }
-        catch (Exception e)
-        {
-            return new Response<CollaboratorResponse>(null, 500, e.Message);
-        }
+        return new Response<Collaborator>(collaborator);
     }
 
-    public async Task<PagedResponse<IEnumerable<CollaboratorResponse>>> GetAllAsync(PagedRequest request)
+    public async Task<PagedResponse<IEnumerable<Collaborator>>> GetAllAsync(PagedRequest request)
     {
-        try
-        {
-            var query = _dbContext
-                .Collaborators
-                .AsNoTracking()
-                .Where(c => c.IsActive);
+        var query = _dbContext
+            .Collaborators
+            .AsNoTracking()
+            .Where(c => c.IsActive);
 
-            var count = await query.CountAsync();
+        var count = await query.CountAsync();
 
-            var collaborators = await query
-                .Skip((request.PageNumber - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync();
+        var collaborators = await query
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
 
-            var collaboratorsResponse = collaborators.Select(c => new CollaboratorResponse 
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Cpf = c.Cpf,
-                Rg = c.Rg,
-                Department = c.Department
-            });
-
-            return new PagedResponse<IEnumerable<CollaboratorResponse>>(collaboratorsResponse, count, request.PageNumber, request.PageSize);
-        }
-        catch (Exception e)
-        {
-            return new PagedResponse<IEnumerable<CollaboratorResponse>>(null, 500, e.Message);
-        }
+        return new PagedResponse<IEnumerable<Collaborator>>(collaborators, count, request.PageNumber, request.PageSize);
     }
 }

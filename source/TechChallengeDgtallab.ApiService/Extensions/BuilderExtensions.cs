@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TechChallengeDgtallab.ApiService.Handlers;
 using TechChallengeDgtallab.Core;
+using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Repositories;
 using TechChallengeDgtallab.Infra.Data;
 using TechChallengeDgtallab.Infra.Repositories;
@@ -16,6 +18,9 @@ public static class BuilderExtensions
 
         builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         builder.Services.AddScoped<ICollaboratorRepository, CollaboratorsRepository>();
+
+        builder.Services.AddScoped<IDepartmentHandler, DepartmentHandler>();
+        builder.Services.AddScoped<ICollaboratorHandler, CollaboratorHandler>();
     }
 
     public static void AddConfiguration(this WebApplicationBuilder builder)
@@ -34,8 +39,10 @@ public static class BuilderExtensions
     {
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly("TechChallengeDgtallab.ApiService"));
+            options.UseNpgsql(builder.Configuration.GetConnectionString("techChallengeDb"),
+                b => b.MigrationsAssembly("TechChallengeDgtallab.ApiService"))
+                .EnableDetailedErrors()
+                .EnableSensitiveDataLogging();
         });
     }
 
