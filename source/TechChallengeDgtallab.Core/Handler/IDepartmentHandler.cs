@@ -9,5 +9,6 @@ public interface IDepartmentHandler
     Task<Response<DepartmentResponse>> UpdateAsync(EditDepartmentRequest request);
     Task<Response<DepartmentResponse>> DeleteAsync(int id);
     Task<Response<DepartmentResponse>> GetByIdAsync(int id);
+    Task<Response<IEnumerable<DepartmentResponse>>> GetDepartmentHierarchyAsync(int id);
     Task<PagedResponse<IEnumerable<DepartmentResponse>>> GetAllAsync(PagedRequest request);
 }

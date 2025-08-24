@@ -19,7 +19,7 @@ public class CollaboratorsController : ControllerBase
 
     [HttpPost]
     [EndpointSummary("Cria um novo colaborador")]
-    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Response<CollaboratorResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> AddAsync([FromBody] EditCollaboratorRequest request)
@@ -30,31 +30,31 @@ public class CollaboratorsController : ControllerBase
         var response = await _handler.AddAsync(request);
 
         return response.IsSuccess
-            ? CreatedAtRoute(nameof(AddAsync), new { id = response.Data?.Id }, response.Data)
-            : this.ToActionResult(new ErrorData(response.Code, response.Message));
+            ? CreatedAtRoute("GetCollaboratorByIdAsync", new { id = response.Data?.Id }, response.Data)
+            : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
     }
 
-    [HttpPut]
+    [HttpPut("{id:int}")]
     [EndpointSummary("Atualiza um colaborador")]
-    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Response<CollaboratorResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateAsync([FromBody] EditCollaboratorRequest request)
+    public async Task<ActionResult> UpdateAsync([FromRoute] int id, [FromBody] EditCollaboratorRequest request)
     {
+        request.Id = id;
         if (!ModelState.IsValid)
             return BadRequest(ModelState.CreateErrorResponse(request));
 
         var response = await _handler.UpdateAsync(request);
 
         return response.IsSuccess
-            ? Ok(response.Data)
-            : this.ToActionResult(new ErrorData(response.Code, response.Message));
+            ? Ok(response)
+            : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
     }
 
-
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = "GetCollaboratorByIdAsync")]
     [EndpointSummary("Obtém um colaborador pelo ID")]
-    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Response<CollaboratorResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> GetByIdAsync([FromRoute] int id)
@@ -62,13 +62,13 @@ public class CollaboratorsController : ControllerBase
         var response = await _handler.GetByIdAsync(id);
 
         return response.IsSuccess
-            ? Ok(response.Data)
-            : this.ToActionResult(new ErrorData(response.Code, response.Message));
+            ? Ok(response)
+            : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
     }
 
     [HttpDelete("{id:int}")]
     [EndpointSummary("Deleta um colaborador pelo ID")]
-    [ProducesResponseType(typeof(CollaboratorResponse), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteAsync(int id)
@@ -77,7 +77,21 @@ public class CollaboratorsController : ControllerBase
 
         return response.IsSuccess
             ? NoContent()
-            : this.ToActionResult(new ErrorData(response.Code, response.Message));
+            : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
+    }
+
+    [HttpGet("{managerId:int}/subordinates")]
+    [EndpointSummary("Obtém todos os colaboradores subordinados a um gerente")]
+    [ProducesResponseType(typeof(Response<IEnumerable<CollaboratorResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> GetSubordinateCollaboratorsAsync([FromRoute] int managerId)
+    {
+        var response = await _handler.GetSubordinatesAsync(managerId);
+
+        return response.IsSuccess
+            ? Ok(response)
+            : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
     }
 
     [HttpGet]
@@ -94,6 +108,6 @@ public class CollaboratorsController : ControllerBase
 
         return response.IsSuccess
             ? Ok(response)
-            : this.ToActionResult(new ErrorData(response.Code, response.Message));
+            : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
     }
 }

@@ -1,4 +1,7 @@
-﻿using TechChallengeDgtallab.Core.Handler;
+﻿using TechChallengeDgtallab.ApiService.Extensions;
+using TechChallengeDgtallab.ApiService.Services;
+using TechChallengeDgtallab.Core.Extensions;
+using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Models;
 using TechChallengeDgtallab.Core.Repositories;
 using TechChallengeDgtallab.Core.Requests;
@@ -8,17 +11,38 @@ namespace TechChallengeDgtallab.ApiService.Handlers;
 
 public class CollaboratorHandler : ICollaboratorHandler
 {
-    private readonly ICollaboratorRepository _repository;
+    private readonly ICollaboratorRepository _collaboratorRepository;
+    private readonly IDepartmentRepository _departmentRepository;
+    private readonly CollaboratorService _collaboratorService;
 
-    public CollaboratorHandler(ICollaboratorRepository repository)
+    public CollaboratorHandler(ICollaboratorRepository collaboratorRepository, 
+        IDepartmentRepository departmentRepository, 
+        CollaboratorService collaboratorService)
     {
-        _repository = repository;
+        _collaboratorRepository = collaboratorRepository;
+        _departmentRepository = departmentRepository;
+        _collaboratorService = collaboratorService;
     }
 
     public async Task<Response<CollaboratorResponse>> AddAsync(EditCollaboratorRequest request)
     {
         try
         {
+            var departmentResult = await _departmentRepository.GetByIdAsync(request.DepartmentId);
+            if (departmentResult.Data is null)
+                return new Response<CollaboratorResponse>(null, 404, "Departamento não encontrado.");
+
+            var isCpfExists = await _collaboratorRepository.GetByCpfAsync(request.Cpf);
+            if (isCpfExists.Data is not null)
+                return new Response<CollaboratorResponse>(null, 409, "CPF já cadastrado.");
+
+            if (!string.IsNullOrEmpty(request.Rg))
+            {
+                var isRgExists = await _collaboratorRepository.GetByRgAsync(request.Rg);
+                if (isRgExists.Data is not null)
+                    return new Response<CollaboratorResponse>(null, 409, "RG já cadastrado.");
+            }
+
             var entity = new Collaborator
             {
                 Name = request.Name,
@@ -30,8 +54,8 @@ public class CollaboratorHandler : ICollaboratorHandler
                 UpdatedAt = DateTime.UtcNow,
             };
 
-            await _repository.AddAsync(entity);
-            return new Response<CollaboratorResponse>(entity, 201, "Colaborador cadastrado com sucesso!");
+            await _collaboratorRepository.AddAsync(entity);
+            return new Response<CollaboratorResponse>(entity.ToResponse(), 201, "Colaborador cadastrado com sucesso!");
         }
         catch (Exception e)
         {
@@ -43,18 +67,32 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var entity = await _repository.GetByIdAsync(request.Id);
-            if (entity.Data is null)
+            var collaborator = await _collaboratorRepository.GetByIdAsync(request.Id);
+            if (collaborator.Data is null)
                 return new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.");
 
-            entity.Data.Name = request.Name;
-            entity.Data.Cpf = request.Cpf;
-            entity.Data.Rg = request.Rg;
-            entity.Data.DepartmentId = request.DepartmentId;
-            entity.Data.UpdatedAt = DateTime.UtcNow;
+            var departmentResult = await _departmentRepository.GetByIdAsync(request.DepartmentId);
+            if (departmentResult.Data is null)
+                return new Response<CollaboratorResponse>(null, 404, "Departamento não encontrado.");
 
-            await _repository.UpdateAsync(entity.Data);
-            return new Response<CollaboratorResponse>(entity.Data, 200, "Colaborador atualizado com sucesso!");
+            if (collaborator.Data.Cpf != request.Cpf)
+            {
+                var isCpfExists = await _collaboratorRepository.GetByCpfAsync(request.Cpf);
+                if (isCpfExists.Data is not null)
+                    return new Response<CollaboratorResponse>(null, 409, "CPF já cadastrado.");
+            }
+
+            if (!string.IsNullOrEmpty(request.Rg) && collaborator.Data.Rg != request.Rg)
+            {
+                var isRgExists = await _collaboratorRepository.GetByRgAsync(request.Rg);
+                if (isRgExists.Data is not null)
+                    return new Response<CollaboratorResponse>(null, 409, "RG já cadastrado.");
+            }
+
+            collaborator.Data = request.ToEntity();
+
+            await _collaboratorRepository.UpdateAsync(collaborator.Data);
+            return new Response<CollaboratorResponse>(collaborator.Data.ToResponse(), 200, "Colaborador atualizado com sucesso!");
         }
         catch (Exception e)
         {
@@ -66,14 +104,14 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var entity = await _repository.GetByIdAsync(id);
+            var entity = await _collaboratorRepository.GetByIdAsync(id);
             if (entity.Data is null)
                 return new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.");
 
             entity.Data.IsActive = false;
             entity.Data.UpdatedAt = DateTime.UtcNow;
 
-            await _repository.DeleteAsync(entity.Data);
+            await _collaboratorRepository.DeleteAsync(entity.Data);
             return new Response<CollaboratorResponse>(null, 204, "Colaborador deletado com sucesso!");
         }
         catch (Exception e)
@@ -86,11 +124,11 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var entity = await _repository.GetByIdAsync(id);
+            var entity = await _collaboratorRepository.GetByIdAsync(id);
 
             return entity.Data is null 
                 ? new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.") 
-                : new Response<CollaboratorResponse>(entity.Data, 200, "Colaborador encontrado com sucesso!");
+                : new Response<CollaboratorResponse>(entity.Data.ToResponse(), 200, "Colaborador encontrado com sucesso!");
         }
         catch (Exception e)
         {
@@ -98,24 +136,48 @@ public class CollaboratorHandler : ICollaboratorHandler
         }
     }
 
+    public async Task<Response<IEnumerable<CollaboratorResponse>>> GetSubordinatesAsync(int managerId)
+    {
+        try
+        {
+            var managerResult = await _collaboratorRepository.GetByIdAsync(managerId);
+            if (managerResult.Data == null)
+                return new Response<IEnumerable<CollaboratorResponse>>(null, 404, "Gerente não encontrado.");
+
+            var departmentsResult = await _collaboratorRepository.GetAllDepartmentsAsync();
+            if (departmentsResult.Data == null)
+                return new Response<IEnumerable<CollaboratorResponse>>(null, 200, "Nenhum departamento encontrado.");
+
+            var allDepartments = departmentsResult.Data.ToList();
+
+            var managedDepartmentIds = new List<int>();
+            _collaboratorService.GetManagedDepartments(managerId, allDepartments, managedDepartmentIds);
+
+            if (!managedDepartmentIds.Any())
+                return new Response<IEnumerable<CollaboratorResponse>>(null, 200, "Nenhum colaborador subordinado encontrado.");
+
+            var collaboratorsResult = await _collaboratorRepository.GetCollaboratorsByDepartmentIdsAsync(managedDepartmentIds, managerId);
+            if (collaboratorsResult.Data == null)
+                return new Response<IEnumerable<CollaboratorResponse>>(null, 200, "Nenhum colaborador subordinado encontrado.");
+
+            var response = collaboratorsResult.Data.ToResponse();
+            return new Response<IEnumerable<CollaboratorResponse>>(response, 200, "Colaboradores subordinados encontrados com sucesso!");
+        }
+        catch (Exception e)
+        {
+            return new Response<IEnumerable<CollaboratorResponse>>(null, 500, e.Message);
+        }
+    }
+
     public async Task<PagedResponse<IEnumerable<CollaboratorResponse>>> GetAllAsync(PagedRequest request)
     {
         try
         {
-            var response = await _repository.GetAllAsync(request);
-            if (response.Data is null || !response.Data.Any())
-                return new PagedResponse<IEnumerable<CollaboratorResponse>>(null, 404, "Nenhum colaborador encontrado.");
+            var result = await _collaboratorRepository.GetAllAsync(request);
 
-            var collaboratorsResponse = response.Data?.Select(c => new CollaboratorResponse
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Cpf = c.Cpf,
-                Rg = c.Rg,
-                Department = c.Department
-            });
+            var response = result.Data?.ToResponse();
 
-            return new PagedResponse<IEnumerable<CollaboratorResponse>>(collaboratorsResponse, response.TotalCount, request.PageNumber, request.PageSize);
+            return new PagedResponse<IEnumerable<CollaboratorResponse>>(response, result.TotalCount, request.PageNumber, request.PageSize);
         }
         catch (Exception e)
         {

@@ -1,6 +1,4 @@
-﻿using TechChallengeDgtallab.Core.Models;
-
-namespace TechChallengeDgtallab.Core.Responses;
+﻿namespace TechChallengeDgtallab.Core.Responses;
 
 public class CollaboratorResponse
 {
@@ -8,17 +6,11 @@ public class CollaboratorResponse
     public string Name { get; set; } = string.Empty;
     public string Cpf { get; set; } = string.Empty;
     public string? Rg { get; set; }
-    public DepartmentResponse? Department { get; set; }
+    public DepartmentInCollaboratorResponse? Department { get; set; }
+}
 
-    public static implicit operator CollaboratorResponse(Collaborator collaborator)
-    {
-        return new CollaboratorResponse
-        {
-            Id = collaborator.Id,
-            Name = collaborator.Name,
-            Cpf = collaborator.Cpf,
-            Rg = collaborator.Rg,
-            Department = collaborator.Department
-        };
-    }
+public class ManagerInDepartmentResponse
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
 }

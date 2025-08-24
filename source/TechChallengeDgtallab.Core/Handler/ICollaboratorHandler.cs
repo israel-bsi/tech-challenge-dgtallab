@@ -9,5 +9,6 @@ public interface ICollaboratorHandler
     Task<Response<CollaboratorResponse>> UpdateAsync(EditCollaboratorRequest request);
     Task<Response<CollaboratorResponse>> DeleteAsync(int id);
     Task<Response<CollaboratorResponse>> GetByIdAsync(int id);
+    Task<Response<IEnumerable<CollaboratorResponse>>> GetSubordinatesAsync(int managerId);
     Task<PagedResponse<IEnumerable<CollaboratorResponse>>> GetAllAsync(PagedRequest request);
 }

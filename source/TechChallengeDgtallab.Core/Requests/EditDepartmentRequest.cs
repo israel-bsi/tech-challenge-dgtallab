@@ -17,4 +17,7 @@ public class EditDepartmentRequest
     [JsonIgnore]
     public EditDepartmentRequest? SuperiorDepartmentRequest { get; set; }
     public int? SuperiorDepartmentId { get; set; }
+
+    [JsonIgnore]
+    public bool IsActive { get; set; }
 }

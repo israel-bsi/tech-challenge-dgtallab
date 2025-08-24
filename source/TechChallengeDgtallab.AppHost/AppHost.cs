@@ -1,6 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var db = builder.AddPostgres("db").WithPgAdmin();
+var db = builder.AddPostgres("db")
+    .WithPgAdmin(opt=>opt.WithHostPort(58678))
+    .WithDataVolume("postgres_data");
 
 var techChallengeDb = db.AddDatabase("techChallengeDb");
 

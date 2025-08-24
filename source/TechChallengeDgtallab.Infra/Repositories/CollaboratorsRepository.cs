@@ -17,18 +17,43 @@ public class CollaboratorsRepository : ICollaboratorRepository
 
     public async Task<Response<Collaborator>> AddAsync(Collaborator collaborator)
     {
+        var department = await _dbContext
+            .Departments
+            .FirstAsync(d => d.Id == collaborator.DepartmentId && d.IsActive);
+
+        _dbContext.Attach(department);
+        collaborator.Department = department;
+
         await _dbContext.Collaborators.AddAsync(collaborator);
         await _dbContext.SaveChangesAsync();
+
+        await _dbContext.Entry(collaborator).Reference(c => c.Department).LoadAsync();
 
         return new Response<Collaborator>(collaborator);
     }
 
-    public async Task<Response<Collaborator>> UpdateAsync(Collaborator collaborator)
+    public async Task<Response<Collaborator>> UpdateAsync(Collaborator request)
     {
-        _dbContext.Collaborators.Update(collaborator);
+        var department = await _dbContext
+            .Departments
+            .FirstAsync(d => d.Id == request.DepartmentId && d.IsActive);
+
+        _dbContext.Attach(department);
+        request.Department = department;
+
+        var existingEntity = _dbContext.ChangeTracker.Entries<Collaborator>()
+            .FirstOrDefault(e => e.Entity.Id == request.Id);
+
+        if (existingEntity != null)
+            existingEntity.CurrentValues.SetValues(request);
+        else
+            _dbContext.Collaborators.Update(request);
+
         await _dbContext.SaveChangesAsync();
 
-        return new Response<Collaborator>(collaborator);
+        await _dbContext.Entry(request).Reference(c => c.Department).LoadAsync();
+
+        return new Response<Collaborator>(request);
     }
 
     public async Task<Response<Collaborator>> DeleteAsync(Collaborator collaborator)
@@ -43,8 +68,32 @@ public class CollaboratorsRepository : ICollaboratorRepository
     {
         var collaborator = await _dbContext
             .Collaborators
+            .Include(c => c.Department)
+            .ThenInclude(d => d.Manager)
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id && c.IsActive);
+
+        return new Response<Collaborator>(collaborator);
+    }
+
+    public async Task<Response<Collaborator>> GetByCpfAsync(string cpf)
+    {
+        var collaborator = await _dbContext
+            .Collaborators
+            .Include(c => c.Department)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Cpf == cpf && c.IsActive);
+
+        return new Response<Collaborator>(collaborator);
+    }
+
+    public async Task<Response<Collaborator>> GetByRgAsync(string? rg)
+    {
+        var collaborator = await _dbContext
+            .Collaborators
+            .Include(c => c.Department)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Rg == rg && c.IsActive);
 
         return new Response<Collaborator>(collaborator);
     }
@@ -53,8 +102,10 @@ public class CollaboratorsRepository : ICollaboratorRepository
     {
         var query = _dbContext
             .Collaborators
+            .Include(c => c.Department)
             .AsNoTracking()
-            .Where(c => c.IsActive);
+            .Where(c => c.IsActive)
+            .OrderByDescending(c => c.CreatedAt);
 
         var count = await query.CountAsync();
 
@@ -64,5 +115,34 @@ public class CollaboratorsRepository : ICollaboratorRepository
             .ToListAsync();
 
         return new PagedResponse<IEnumerable<Collaborator>>(collaborators, count, request.PageNumber, request.PageSize);
+    }
+
+    public async Task<Response<IEnumerable<Department>>> GetAllDepartmentsAsync()
+    {
+        var departments = await _dbContext
+            .Departments
+            .Include(d => d.Manager)
+            .AsNoTracking()
+            .Where(d => d.IsActive)
+            .ToListAsync();
+
+        return new Response<IEnumerable<Department>>(departments);
+    }
+
+    public async Task<Response<IEnumerable<Collaborator>>> GetCollaboratorsByDepartmentIdsAsync(List<int> departmentIds, int excludeManagerId)
+    {
+        var collaborators = await _dbContext
+            .Collaborators
+            .Include(c => c.Department)
+            .ThenInclude(d => d.Manager)
+            .AsNoTracking()
+            .Where(c => c.IsActive &&
+                       departmentIds.Contains(c.DepartmentId) &&
+                       c.Id != excludeManagerId)
+            .OrderBy(c => c.Department.Name)
+            .ThenBy(c => c.Name)
+            .ToListAsync();
+
+        return new Response<IEnumerable<Collaborator>>(collaborators);
     }
 }

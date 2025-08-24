@@ -5,19 +5,20 @@ namespace TechChallengeDgtallab.Core.Responses;
 public class Response<TData>
 {
     [JsonConstructor]
-    public Response() => Code = Configuration.DefaultStatusCode;
+    public Response() => StatusCode = Configuration.DefaultStatusCode;
 
-    public Response(TData? data, int code = Configuration.DefaultStatusCode, string? message = null)
+    public Response(TData? data, int statusCode = Configuration.DefaultStatusCode, string? message = null)
     {
         Data = data;
-        Code = code;
+        StatusCode = statusCode;
         Message = message;
     }
 
-    public int Code { get; set; }
+    [JsonIgnore]
+    public int StatusCode { get; set; }
     public TData? Data { get; set; }
     public string? Message { get; set; }
 
     [JsonIgnore]
-    public bool IsSuccess => Code is >= 200 and < 299;
+    public bool IsSuccess => StatusCode is >= 200 and < 299;
 }
