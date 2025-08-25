@@ -1,0 +1,96 @@
+﻿@inherits LayoutComponentBase
+@using Blazored.LocalStorage
+
+<MudThemeProvider @ref="_mudThemeProvider"
+                  @bind-IsDarkMode="IsDarkMode"
+                  Theme="Configuration.Theme" />
+<MudSnackbarProvider />
+<MudDialogProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudAppBar>
+        <MudTooltip Text="Abir/Fechar Menu de Navegação">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Inherit"
+                           Edge="Edge.Start"
+                           OnClick="ToggleDrawer" />
+        </MudTooltip>
+        Teste Tecnico Dgtallab
+        <MudSpacer />
+        <MudTooltip Text="Mudar tema">
+            <MudSwitch Color="Color.Inherit"
+                       Value="IsDarkMode"
+                       ValueChanged="OnThemeToggled"
+                       T="bool"
+                       ThumbIcon="@Icons.Material.TwoTone.DarkMode"
+                       Class="ma-4"
+                       Disabled="DisableMudSwitch" />
+        </MudTooltip>
+
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="@_isDrawerOpened">
+        <NavMenu @key="MudNavMenuKey" />
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code
+{
+    public bool SaveState { get; set; }
+    public bool IsDarkMode { get; set; }
+    public bool DisableMudSwitch { get; set; }
+    public bool _isDrawerOpened { get; set; } = true;
+    public int MudNavMenuKey { get; set; }
+    private MudThemeProvider _mudThemeProvider = null!;
+
+    [Inject] public ILocalStorageService LocalStorage { get; set; } = null!;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var storedTheme = await LocalStorage.GetItemAsync<bool?>("themePreference");
+            if (storedTheme.HasValue)
+            {
+                IsDarkMode = storedTheme.Value;
+            }
+            else
+            {
+                IsDarkMode = await _mudThemeProvider.GetSystemDarkModeAsync();
+            }
+            await LocalStorage.SetItemAsync<bool?>("themePreference", IsDarkMode);
+            StateHasChanged();
+        }
+        MudNavMenuKey++;
+        SaveState = true;
+    }
+
+    private void ToggleDrawer()
+    {
+        _isDrawerOpened = !_isDrawerOpened;
+        SaveState = true;
+    }
+
+    private async Task OnThemeToggled(bool newValue)
+    {
+        IsDarkMode = newValue;
+        if (!SaveState) return;
+        await LocalStorage.SetItemAsync("themePreference", IsDarkMode);
+        StateHasChanged();
+    }
+
+    public void UpdateStatusDark(bool isDarkMode, bool disableMudSwtich)
+    {
+        IsDarkMode = isDarkMode;
+        SaveState = false;
+        DisableMudSwitch = disableMudSwtich;
+        StateHasChanged();
+    }
+}

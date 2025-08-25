@@ -80,7 +80,7 @@ public class CollaboratorsController : ControllerBase
             : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
     }
 
-    [HttpGet("{managerId:int}/subordinates")]
+    [HttpGet("subordinates/{managerId:int}")]
     [EndpointSummary("Obtém todos os colaboradores subordinados a um gerente")]
     [ProducesResponseType(typeof(Response<IEnumerable<CollaboratorResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]

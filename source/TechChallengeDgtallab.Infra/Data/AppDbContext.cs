@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TechChallengeDgtallab.Core.Models;
-using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.Infra.Data;
 

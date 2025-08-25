@@ -1,5 +1,4 @@
-﻿using TechChallengeDgtallab.ApiService.Extensions;
-using TechChallengeDgtallab.ApiService.Services;
+﻿using TechChallengeDgtallab.ApiService.Services;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Models;
@@ -54,8 +53,10 @@ public class CollaboratorHandler : ICollaboratorHandler
                 UpdatedAt = DateTime.UtcNow,
             };
 
-            await _collaboratorRepository.AddAsync(entity);
-            return new Response<CollaboratorResponse>(entity.ToResponse(), 201, "Colaborador cadastrado com sucesso!");
+            var result = await _collaboratorRepository.AddAsync(entity);
+            return result.IsSuccess 
+                ? new Response<CollaboratorResponse>(result.Data?.ToResponse(), 201, "Colaborador cadastrado com sucesso!") 
+                : new Response<CollaboratorResponse>(null, 500, "Erro ao cadastrar colaborador.");
         }
         catch (Exception e)
         {
@@ -91,8 +92,10 @@ public class CollaboratorHandler : ICollaboratorHandler
 
             collaborator.Data = request.ToEntity();
 
-            await _collaboratorRepository.UpdateAsync(collaborator.Data);
-            return new Response<CollaboratorResponse>(collaborator.Data.ToResponse(), 200, "Colaborador atualizado com sucesso!");
+            var result = await _collaboratorRepository.UpdateAsync(collaborator.Data);
+            return result.IsSuccess 
+                ? new Response<CollaboratorResponse>(result.Data?.ToResponse(), 200, "Colaborador atualizado com sucesso!") 
+                : new Response<CollaboratorResponse>(null, 500, "Erro ao atualizar colaborador.");
         }
         catch (Exception e)
         {

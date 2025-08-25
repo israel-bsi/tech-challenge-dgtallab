@@ -11,13 +11,10 @@ public class EditDepartmentRequest
     public string Name { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public EditCollaboratorRequest? CollaboratorRequest { get; set; }
+    public EditCollaboratorRequest? Manager { get; set; }
     public int? ManagerId { get; set; }
 
     [JsonIgnore]
-    public EditDepartmentRequest? SuperiorDepartmentRequest { get; set; }
+    public EditDepartmentRequest? SuperiorDepartment { get; set; }
     public int? SuperiorDepartmentId { get; set; }
-
-    [JsonIgnore]
-    public bool IsActive { get; set; }
 }

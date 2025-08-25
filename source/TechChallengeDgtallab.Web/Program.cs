@@ -1,5 +1,8 @@
+using Blazored.LocalStorage;
+using MudBlazor.Services;
+using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Web;
-using TechChallengeDgtallab.Web.Components;
+using TechChallengeDgtallab.Web.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +14,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddOutputCache();
-
-builder.Services.AddHttpClient<WeatherApiClient>(client => client.BaseAddress = new("http://apiservice"));
+builder.Services.AddMudServices();
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<IDepartmentHandler, DepartmentHandler>();
+builder.Services.AddScoped<ICollaboratorHandler, CollaboratorHandler>();
 
 var app = builder.Build();
 

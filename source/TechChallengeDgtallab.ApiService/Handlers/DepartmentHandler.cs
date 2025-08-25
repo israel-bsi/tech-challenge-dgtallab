@@ -1,5 +1,4 @@
-﻿using TechChallengeDgtallab.ApiService.Extensions;
-using TechChallengeDgtallab.ApiService.Services;
+﻿using TechChallengeDgtallab.ApiService.Services;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Models;

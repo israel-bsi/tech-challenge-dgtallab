@@ -8,7 +8,7 @@ namespace TechChallengeDgtallab.ApiService.Controllers;
 
 [ApiController]
 [Tags("Departamentos")]
-[Route("api/v1/department")]
+[Route("api/v1/departments")]
 public class DepartmentController : ControllerBase
 {
     private readonly IDepartmentHandler _handler;
