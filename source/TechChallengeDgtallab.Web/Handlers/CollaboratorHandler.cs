@@ -53,6 +53,14 @@ namespace TechChallengeDgtallab.Web.Handlers
                    ?? new Response<IEnumerable<CollaboratorResponse>>(null, 400, "Erro ao obter os subordinados");
         }
 
+        public async Task<Response<IEnumerable<CollaboratorResponse>>> GetCollaboratorsByDepartment(int departmentId)
+        {
+            var result = await _httpClient.GetAsync($"/api/v1/collaborators/department/{departmentId}");
+
+            return await result.Content.ReadFromJsonAsync<Response<IEnumerable<CollaboratorResponse>>>()
+                   ?? new Response<IEnumerable<CollaboratorResponse>>(null, 400, "Erro ao obter os colaboradores do departamento");
+        }
+
         public async Task<PagedResponse<IEnumerable<CollaboratorResponse>>> GetAllAsync(PagedRequest request)
         {
             var url = $"/api/v1/collaborators?pageNumber={request.PageNumber}&pageSize={request.PageSize}";

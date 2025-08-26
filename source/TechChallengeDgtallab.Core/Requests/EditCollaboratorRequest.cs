@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace TechChallengeDgtallab.Core.Requests;
 
@@ -16,7 +15,8 @@ public class EditCollaboratorRequest
     [Range(1, int.MaxValue, ErrorMessage = "O Departamento é obrigatório")]
     public int DepartmentId { get; set; }
 
-    [JsonIgnore]
     public EditDepartmentRequest? DepartmentRequest { get; set; }
     public string? Rg { get; set; }
+
+    public override string ToString() => Name;
 }

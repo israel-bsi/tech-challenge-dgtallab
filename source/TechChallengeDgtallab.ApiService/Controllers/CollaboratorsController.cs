@@ -94,6 +94,20 @@ public class CollaboratorsController : ControllerBase
             : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
     }
 
+    [HttpGet("department/{id:int}")]
+    [EndpointSummary("Obtém todos os colaboradores de um departamento")]
+    [ProducesResponseType(typeof(Response<IEnumerable<CollaboratorResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> GetCollaboratorsByDepartmentAsync([FromRoute] int id)
+    {
+        var response = await _handler.GetCollaboratorsByDepartment(id);
+
+        return response.IsSuccess
+            ? Ok(response)
+            : this.ToActionResult(new ErrorData(response.StatusCode, response.Message));
+    }
+
     [HttpGet]
     [EndpointSummary("Obtém todos os colaboradores")]
     [ProducesResponseType(typeof(PagedResponse<IEnumerable<CollaboratorResponse>>), StatusCodes.Status200OK)]

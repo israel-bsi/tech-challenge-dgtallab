@@ -1,4 +1,8 @@
-﻿@page "/departamentos/editar/{îd:int}"
-@inherits DepartmentFormComponent
+﻿@page "/departamentos/editar/{id:int}"
 
 <DepartmentForm Id="@Id"/>
+
+@code
+{
+    [Parameter] public int Id { get; set; }
+}

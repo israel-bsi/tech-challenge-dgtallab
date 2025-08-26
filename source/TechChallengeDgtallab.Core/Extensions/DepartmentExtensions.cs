@@ -74,7 +74,29 @@ public static class DepartmentExtensions
                 Id = department.Id,
                 Name = department.Name,
                 ManagerId = department.Manager?.Id,
-                SuperiorDepartmentId = department.SuperiorDepartment?.Id
+                SuperiorDepartmentId = department.SuperiorDepartment?.Id,
+                Manager = department.Manager is not null
+                    ? new EditCollaboratorRequest
+                    {
+                        Id = department.Manager.Id,
+                        Name = department.Manager.Name
+                    }
+                    : null,
+            };
+            requests.Add(item);
+        }
+        return requests;
+    }
+
+    public static IEnumerable<SuperiorDepartmentRequest> ToSuperiorRequest(this IEnumerable<DepartmentResponse> response)
+    {
+        var requests = new List<SuperiorDepartmentRequest>();
+        foreach (var department in response)
+        {
+            var item = new SuperiorDepartmentRequest
+            {
+                Id = department.Id,
+                Name = department.Name
             };
             requests.Add(item);
         }

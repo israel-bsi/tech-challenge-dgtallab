@@ -98,6 +98,20 @@ public class CollaboratorsRepository : ICollaboratorRepository
         return new Response<Collaborator>(collaborator);
     }
 
+    public async Task<Response<IEnumerable<Collaborator>>> GetCollaboratorsByDepartment(int departmentId)
+    {
+        var collaborators = await _dbContext
+            .Collaborators
+            .Include(c => c.Department)
+            .ThenInclude(d => d.Manager)
+            .AsNoTracking()
+            .Where(c => c.IsActive && c.DepartmentId == departmentId)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
+        return new Response<IEnumerable<Collaborator>>(collaborators);
+    }
+
     public async Task<PagedResponse<IEnumerable<Collaborator>>> GetAllAsync(PagedRequest request)
     {
         var query = _dbContext

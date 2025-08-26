@@ -36,7 +36,11 @@
     </ToolBarContent>
     <Columns>
         <PropertyColumn Property="x => x.Name" Title="Nome" />
-        <PropertyColumn Property="x => x.Manager!.Name" Title="Gerente" />
+        <TemplateColumn Title="Gerente">
+            <CellTemplate>
+                @context.Item.Manager?.Name
+            </CellTemplate>
+        </TemplateColumn>
         <PropertyColumn Property="x => x.SuperiorDepartment" Title="Departamento Superior" />
         <TemplateColumn Class="justify-end" Title="Ações">
             <CellTemplate>

@@ -14,5 +14,6 @@ public interface ICollaboratorRepository
     Task<Response<Collaborator>> GetByRgAsync(string rg);
     Task<Response<IEnumerable<Department>>> GetAllDepartmentsAsync();
     Task<Response<IEnumerable<Collaborator>>> GetCollaboratorsByDepartmentIdsAsync(List<int> departmentIds, int excludeManagerId);
+    Task<Response<IEnumerable<Collaborator>>> GetCollaboratorsByDepartment(int departmentId);
     Task<PagedResponse<IEnumerable<Collaborator>>> GetAllAsync(PagedRequest request);
 }

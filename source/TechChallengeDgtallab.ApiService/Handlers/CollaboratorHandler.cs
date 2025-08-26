@@ -172,6 +172,27 @@ public class CollaboratorHandler : ICollaboratorHandler
         }
     }
 
+    public async Task<Response<IEnumerable<CollaboratorResponse>>> GetCollaboratorsByDepartment(int departmentId)
+    {
+        try
+        {
+            var departmentResult = await _departmentRepository.GetByIdAsync(departmentId);
+            if (departmentResult.Data is null)
+                return new Response<IEnumerable<CollaboratorResponse>>(null, 404, "Departamento não encontrado.");
+
+            var collaboratorsResult = await _collaboratorRepository.GetCollaboratorsByDepartment(departmentId);
+            if (collaboratorsResult.Data is null || !collaboratorsResult.Data.Any())
+                return new Response<IEnumerable<CollaboratorResponse>>(null, 200, "Nenhum colaborador encontrado para o departamento informado.");
+
+            var response = collaboratorsResult.Data.ToResponse();
+            return new Response<IEnumerable<CollaboratorResponse>>(response, 200, "Colaboradores encontrados com sucesso!");
+        }
+        catch (Exception e)
+        {
+            return new Response<IEnumerable<CollaboratorResponse>>(null, 500, e.Message);
+        }
+    }
+
     public async Task<PagedResponse<IEnumerable<CollaboratorResponse>>> GetAllAsync(PagedRequest request)
     {
         try
