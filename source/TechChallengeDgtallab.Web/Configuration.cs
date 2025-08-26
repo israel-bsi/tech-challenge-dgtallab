@@ -1,25 +1,26 @@
 ﻿using MudBlazor;
 
-namespace TechChallengeDgtallab.Web;
-
-public class Configuration
+namespace TechChallengeDgtallab.Web
 {
-    public const string HttpClientName = "default";
-
-    private const string PrincipalColor = "#4E61FF";
-    public static readonly MudTheme Theme = new()
+    public class Configuration
     {
-        Typography = new Typography
+        public const string HttpClientName = "default";
+
+        private const string PrincipalColor = "#4E61FF";
+        public static readonly MudTheme Theme = new()
         {
-            Default = new DefaultTypography
+            Typography = new Typography
             {
-                FontFamily = ["Poppins", "sans-serif"],
-                FontSize = "14",
+                Default = new DefaultTypography
+                {
+                    FontFamily = ["Poppins", "sans-serif"],
+                    FontSize = "14",
+                }
+            },
+            PaletteLight = new PaletteLight
+            {
+                Primary = PrincipalColor,
             }
-        },
-        PaletteLight = new PaletteLight
-        {
-            Primary = PrincipalColor,
-        }
-    };
+        };
+    }
 }

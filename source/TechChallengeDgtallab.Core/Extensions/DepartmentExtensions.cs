@@ -64,6 +64,23 @@ public static class DepartmentExtensions
         return response;
     }
 
+    public static IEnumerable<EditDepartmentRequest> ToRequest(this IEnumerable<DepartmentResponse> response)
+    {
+        var requests = new List<EditDepartmentRequest>();
+        foreach (var department in response)
+        {
+            var item = new EditDepartmentRequest
+            {
+                Id = department.Id,
+                Name = department.Name,
+                ManagerId = department.Manager?.Id,
+                SuperiorDepartmentId = department.SuperiorDepartment?.Id
+            };
+            requests.Add(item);
+        }
+        return requests;
+    }
+
     public static Department ToEntity(this EditDepartmentRequest request)
     {
         return new Department

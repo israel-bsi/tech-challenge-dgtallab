@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\TechChallengeDgtallab.Core\TechChallengeDgtallab.Core.csproj" />
     <ProjectReference Include="..\TechChallengeDgtallab.Infra\TechChallengeDgtallab.Infra.csproj" />
-    <ProjectReference Include="..\TechChallengeDgtallab.ServiceDefaults\TechChallengeDgtallab.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>

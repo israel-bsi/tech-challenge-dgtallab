@@ -1,40 +1,23 @@
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Web;
 using TechChallengeDgtallab.Web.Handlers;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-builder.Services.AddOutputCache();
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddMudServices();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IDepartmentHandler, DepartmentHandler>();
 builder.Services.AddScoped<ICollaboratorHandler, CollaboratorHandler>();
 
-var app = builder.Build();
+builder.Services
+    .AddHttpClient(Configuration.HttpClientName, opt =>
+    {
+        opt.BaseAddress = new Uri(TechChallengeDgtallab.Core.Configuration.BackendUrl);
+    });
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-}
-
-app.UseAntiforgery();
-
-app.UseOutputCache();
-
-app.MapStaticAssets();
-
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.MapDefaultEndpoints();
-
-app.Run();
+await builder.Build().RunAsync();

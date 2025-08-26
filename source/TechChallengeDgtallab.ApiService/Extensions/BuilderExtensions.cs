@@ -13,7 +13,6 @@ public static class BuilderExtensions
 {
     public static void AddServices(this WebApplicationBuilder builder)
     {
-        builder.AddServiceDefaults();
         builder.Services.AddProblemDetails();
         builder.Services.AddOpenApi();
 
