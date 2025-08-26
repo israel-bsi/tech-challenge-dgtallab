@@ -1,15 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TechChallengeDgtallab.Core.Requests.Collaborator;
 
-namespace TechChallengeDgtallab.Core.Requests;
+namespace TechChallengeDgtallab.Core.Requests.Department;
 
-public class EditDepartmentRequest
+public class UpdateDepartmentRequest
 {
     public int Id { get; set; }
 
     [Required(ErrorMessage = "O Nome é obrigatório")]
     public string Name { get; set; } = string.Empty;
 
-    public EditCollaboratorRequest? Manager { get; set; }
+    [ValidateComplexType(ErrorMessage = "Gerente inválido")]
+    public UpdateCollaboratorRequest? Manager { get; set; }
     public int? ManagerId { get; set; }
 
     public SuperiorDepartmentRequest? SuperiorDepartment { get; set; }

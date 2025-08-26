@@ -2,6 +2,7 @@
 using TechChallengeDgtallab.ApiService.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.ApiService.Controllers;
@@ -23,10 +24,10 @@ public class DepartmentController : ControllerBase
     [ProducesResponseType(typeof(Response<DepartmentResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> AddAsync([FromBody] EditDepartmentRequest request)
+    public async Task<ActionResult> AddAsync([FromBody] CreateDepartmentRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState.CreateErrorResponse(request));
+            return BadRequest(ModelState.CreateErrorResponse());
 
         var response = await _handler.AddAsync(request);
 
@@ -40,11 +41,11 @@ public class DepartmentController : ControllerBase
     [ProducesResponseType(typeof(Response<DepartmentResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateAsync([FromRoute] int id, [FromBody] EditDepartmentRequest request)
+    public async Task<ActionResult> UpdateAsync([FromRoute] int id, [FromBody] UpdateDepartmentRequest request)
     {
         request.Id = id;
         if (!ModelState.IsValid)
-            return BadRequest(ModelState.CreateErrorResponse(request));
+            return BadRequest(ModelState.CreateErrorResponse());
     
         var response = await _handler.UpdateAsync(request);
 
@@ -103,7 +104,7 @@ public class DepartmentController : ControllerBase
     public async Task<ActionResult> GetAllAsync([FromQuery] PagedRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState.CreateErrorResponse(request));
+            return BadRequest(ModelState.CreateErrorResponse());
 
         var response = await _handler.GetAllAsync(request);
 

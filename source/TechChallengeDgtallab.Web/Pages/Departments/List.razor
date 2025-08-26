@@ -1,5 +1,5 @@
 ﻿@page "/departamentos"
-@using TechChallengeDgtallab.Core.Requests
+@using TechChallengeDgtallab.Core.Requests.Department
 @inherits ListDepartmentPage
 
 <MudText Typo="Typo.h3">Departamentos</MudText>
@@ -15,7 +15,7 @@
     </MudButton>
 </div>
 
-<MudDataGrid T="EditDepartmentRequest"
+<MudDataGrid T="UpdateDepartmentRequest"
              Class="mt-4"
              ServerData="LoadServerData"
              @ref="DataGrid"
@@ -41,7 +41,11 @@
                 @context.Item.Manager?.Name
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.SuperiorDepartment" Title="Departamento Superior" />
+        <TemplateColumn Title="Departamento Superior">
+            <CellTemplate>
+                @context.Item.SuperiorDepartment?.Name
+            </CellTemplate>
+        </TemplateColumn>
         <TemplateColumn Class="justify-end" Title="Ações">
             <CellTemplate>
                 <MudStack Row>
@@ -62,6 +66,6 @@
         </TemplateColumn>
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="EditDepartmentRequest" />
+        <MudDataGridPager T="UpdateDepartmentRequest" />
     </PagerContent>
 </MudDataGrid>

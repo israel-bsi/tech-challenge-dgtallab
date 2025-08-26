@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TechChallengeDgtallab.Core.Requests.Department;
 
-namespace TechChallengeDgtallab.Core.Requests;
+namespace TechChallengeDgtallab.Core.Requests.Collaborator;
 
-public class EditCollaboratorRequest
+public class CreateCollaboratorRequest
 {
     public int Id { get; set; }
 
@@ -15,8 +16,6 @@ public class EditCollaboratorRequest
     [Range(1, int.MaxValue, ErrorMessage = "O Departamento é obrigatório")]
     public int DepartmentId { get; set; }
 
-    public EditDepartmentRequest? DepartmentRequest { get; set; }
+    public CreateDepartmentRequest Department { get; set; } = new();
     public string? Rg { get; set; }
-
-    public override string ToString() => Name;
 }

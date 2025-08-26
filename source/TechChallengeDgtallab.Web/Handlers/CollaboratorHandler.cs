@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Collaborator;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.Web.Handlers
@@ -13,7 +14,7 @@ namespace TechChallengeDgtallab.Web.Handlers
         {
             _httpClient = factory.CreateClient(Configuration.HttpClientName);
         }
-        public async Task<Response<CollaboratorResponse>> AddAsync(EditCollaboratorRequest request)
+        public async Task<Response<CollaboratorResponse>> AddAsync(CreateCollaboratorRequest request)
         {
             var result = await _httpClient.PostAsJsonAsync("/api/v1/collaborators", request);
 
@@ -21,7 +22,7 @@ namespace TechChallengeDgtallab.Web.Handlers
                    ?? new Response<CollaboratorResponse>(null, 400, "Erro ao criar o colaborador");
         }
 
-        public async Task<Response<CollaboratorResponse>> UpdateAsync(EditCollaboratorRequest request)
+        public async Task<Response<CollaboratorResponse>> UpdateAsync(UpdateCollaboratorRequest request)
         {
             var result = await _httpClient.PutAsJsonAsync("/api/v1/collaborators", request);
 

@@ -4,6 +4,7 @@ using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Models;
 using TechChallengeDgtallab.Core.Repositories;
 using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.ApiService.Handlers;
@@ -23,22 +24,23 @@ public class DepartmentHandler : IDepartmentHandler
         _departmentService = departmentService;
     }
 
-    public async Task<Response<DepartmentResponse>> AddAsync(EditDepartmentRequest request)
+    public async Task<Response<DepartmentResponse>> AddAsync(CreateDepartmentRequest request)
     {
         try
         {
-            var collaborator = await _collaboratorRepository.GetByIdAsync(request.ManagerId ?? 0);
-            if (request.ManagerId.HasValue && collaborator.Data is null)
-                return new Response<DepartmentResponse>(null, 404, "Gerente não encontrado.");
+            if (request.SuperiorDepartmentId.HasValue)
+            {
+                var superiorDepartment = await _departmentRepository
+                    .GetByIdAsync(request.SuperiorDepartmentId.Value);
 
-            if (request.ManagerId > 0 && collaborator.Data?.DepartmentId != request.Id)
-                return new Response<DepartmentResponse>(null, 400, "O gerente deve pertencer ao departamento.");
+                if (superiorDepartment.Data is null)
+                    return new Response<DepartmentResponse>(null, 404, "Departamento superior não encontrado.");
+            }
 
             var department = new Department
             {
                 Name = request.Name,
                 SuperiorDepartmentId = request.SuperiorDepartmentId,
-                ManagerId = request.ManagerId,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -53,13 +55,13 @@ public class DepartmentHandler : IDepartmentHandler
         }
     }
 
-    public async Task<Response<DepartmentResponse>> UpdateAsync(EditDepartmentRequest request)
+    public async Task<Response<DepartmentResponse>> UpdateAsync(UpdateDepartmentRequest request)
     {
         try
         {
             var department = await _departmentRepository.GetByIdAsync(request.Id);
             if (department.Data is null)
-                return new Response<DepartmentResponse>(null, 404, "Departamento não encontrado.");
+                return new Response<DepartmentResponse>(null, 404, "Departamento superior não encontrado.");
 
             if (request.ManagerId.HasValue)
             {

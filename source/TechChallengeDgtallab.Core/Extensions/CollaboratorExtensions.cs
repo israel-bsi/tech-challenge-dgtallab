@@ -1,5 +1,6 @@
 ﻿using TechChallengeDgtallab.Core.Models;
-using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Collaborator;
+using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.Core.Extensions;
@@ -44,20 +45,20 @@ public static class CollaboratorExtensions
         return response;
     }
 
-    public static IEnumerable<EditCollaboratorRequest> ToRequest(this IEnumerable<CollaboratorResponse> collaborators)
+    public static IEnumerable<UpdateCollaboratorRequest> ToRequest(this IEnumerable<CollaboratorResponse> collaborators)
     {
-        var requests = new List<EditCollaboratorRequest>();
+        var requests = new List<UpdateCollaboratorRequest>();
         foreach (var collaborator in collaborators)
         {
-            var request = new EditCollaboratorRequest
+            var request = new UpdateCollaboratorRequest
             {
                 Id = collaborator.Id,
                 Name = collaborator.Name,
                 Cpf = collaborator.Cpf,
                 Rg = collaborator.Rg,
                 DepartmentId = collaborator.Department?.Id ?? 0,
-                DepartmentRequest = collaborator.Department is not null
-                    ? new EditDepartmentRequest
+                Department = collaborator.Department is not null
+                    ? new UpdateDepartmentRequest
                     {
                         Id = collaborator.Department.Id,
                         Name = collaborator.Department.Name
@@ -69,7 +70,7 @@ public static class CollaboratorExtensions
         return requests;
     }
 
-    public static Collaborator ToEntity(this EditCollaboratorRequest request)
+    public static Collaborator ToEntity(this UpdateCollaboratorRequest request)
     {
         return new Collaborator
         {

@@ -1,4 +1,4 @@
-﻿namespace TechChallengeDgtallab.Core.Requests;
+﻿namespace TechChallengeDgtallab.Core.Requests.Department;
 
 public class SuperiorDepartmentRequest
 {

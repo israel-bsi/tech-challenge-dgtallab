@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.Web.Handlers
@@ -14,7 +15,7 @@ namespace TechChallengeDgtallab.Web.Handlers
             _httpClient = factory.CreateClient(Configuration.HttpClientName);
         }
 
-        public async Task<Response<DepartmentResponse>> AddAsync(EditDepartmentRequest request)
+        public async Task<Response<DepartmentResponse>> AddAsync(CreateDepartmentRequest request)
         {
             var result = await _httpClient.PostAsJsonAsync("/api/v1/departments", request);
 
@@ -22,7 +23,7 @@ namespace TechChallengeDgtallab.Web.Handlers
                    ?? new Response<DepartmentResponse>(null, 400, "Erro ao criar o departamento");
         }
 
-        public async Task<Response<DepartmentResponse>> UpdateAsync(EditDepartmentRequest request)
+        public async Task<Response<DepartmentResponse>> UpdateAsync(UpdateDepartmentRequest request)
         {
             var result = await _httpClient.PutAsJsonAsync($"/api/v1/departments/{request.Id}", request);
 
@@ -34,8 +35,9 @@ namespace TechChallengeDgtallab.Web.Handlers
         {
             var result = await _httpClient.DeleteAsync($"/api/v1/departments/{id}");
 
-            return await result.Content.ReadFromJsonAsync<Response<DepartmentResponse>>()
-                   ?? new Response<DepartmentResponse>(null, 400, "Erro ao deletar o departamento");
+            return result.IsSuccessStatusCode 
+                ? new Response<DepartmentResponse>(null, 200, "Departamento deletado") 
+                : new Response<DepartmentResponse>(null, 400, "Erro ao deletar o departamento");
         }
 
         public async Task<Response<DepartmentResponse>> GetByIdAsync(int id)

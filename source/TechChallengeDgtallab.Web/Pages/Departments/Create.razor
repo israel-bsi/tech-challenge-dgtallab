@@ -1,3 +1,45 @@
 ﻿@page "/departamentos/adicionar"
+@using TechChallengeDgtallab.Core.Requests.Department
+@inherits CreateDepartmentPage
 
-<DepartmentForm />
+<PageTitle>Cadastrar Departamento</PageTitle>
+
+<MudText Typo="Typo.h4">Cadastrar Departamento</MudText>
+
+@if (IsBusy)
+{
+    <SkeletonWave />
+}
+else
+{
+    <MudPaper Class="pa-8 mt-4" Elevation="2">
+        <EditForm OnValidSubmit="OnValidSubmitAsync" Model="InputModel">
+            <ObjectGraphDataAnnotationsValidator />
+            <MudTextField T="string"
+                          Label="Nome do Departamento"
+                          @bind-Value="InputModel.Name"
+                          For="@(() => InputModel.Name)"
+                          InputType="InputType.Text"
+                          Class="mb-4" />
+
+            <MudSelect T="SuperiorDepartmentRequest"
+                       Label="Departamento Superior"
+                       Value="InputModel.SuperiorDepartment"
+                       ValueChanged="OnSelectedSuperiorDepartmentValueChanged"
+                       Class="mb-4">
+                @foreach (var department in Departments)
+                {
+                    <MudSelectItem Value="@department">@department</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Class="mt-6"
+                       StartIcon="@Icons.Material.Filled.Save">
+                Salvar
+            </MudButton>
+        </EditForm>
+    </MudPaper>
+}

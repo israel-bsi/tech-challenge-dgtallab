@@ -1,0 +1,77 @@
+﻿using Microsoft.AspNetCore.Components;
+using MudBlazor;
+using TechChallengeDgtallab.Core.Extensions;
+using TechChallengeDgtallab.Core.Handler;
+using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Department;
+
+namespace TechChallengeDgtallab.Web.Pages.Departments;
+
+public partial class CreateDepartmentPage : ComponentBase
+{
+    public CreateDepartmentRequest InputModel { get; set; } = new();
+    public IEnumerable<SuperiorDepartmentRequest> Departments { get; set; } = [];
+    public bool IsBusy { get; set; }
+
+    [Inject] public IDepartmentHandler DepartmentHandler { get; set; } = null!;
+
+    [Inject] public NavigationManager NavigationManager { get; set; } = null!;
+
+    [Inject] public ISnackbar Snackbar { get; set; } = null!;
+
+    public async Task OnValidSubmitAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            var result = await DepartmentHandler.AddAsync(InputModel);
+
+            var resultMessage = result.Message ?? string.Empty;
+            if (result.IsSuccess)
+            {
+                Snackbar.Add(resultMessage, Severity.Success);
+                NavigationManager.NavigateTo("/departamentos");
+            }
+            else
+                Snackbar.Add(resultMessage, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            var request = new PagedRequest { PageNumber = 1, PageSize = 1000 };
+            var result = await DepartmentHandler.GetAllAsync(request);
+            if (result.IsSuccess)
+                Departments = result
+                    .Data?
+                    .ToSuperiorRequest() ?? [];
+            else
+                Snackbar.Add(result.Message ?? "Erro ao obter departamentos", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    public void OnSelectedSuperiorDepartmentValueChanged(SuperiorDepartmentRequest newValue)
+    {
+        InputModel.SuperiorDepartmentId = newValue.Id;
+        InputModel.SuperiorDepartment = newValue;
+    }
+}

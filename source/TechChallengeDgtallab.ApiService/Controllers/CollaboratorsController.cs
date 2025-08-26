@@ -2,6 +2,7 @@
 using TechChallengeDgtallab.ApiService.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Collaborator;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.ApiService.Controllers;
@@ -22,10 +23,10 @@ public class CollaboratorsController : ControllerBase
     [ProducesResponseType(typeof(Response<CollaboratorResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> AddAsync([FromBody] EditCollaboratorRequest request)
+    public async Task<ActionResult> AddAsync([FromBody] CreateCollaboratorRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState.CreateErrorResponse(request));
+            return BadRequest(ModelState.CreateErrorResponse());
 
         var response = await _handler.AddAsync(request);
 
@@ -39,11 +40,11 @@ public class CollaboratorsController : ControllerBase
     [ProducesResponseType(typeof(Response<CollaboratorResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateAsync([FromRoute] int id, [FromBody] EditCollaboratorRequest request)
+    public async Task<ActionResult> UpdateAsync([FromRoute] int id, [FromBody] UpdateCollaboratorRequest request)
     {
         request.Id = id;
         if (!ModelState.IsValid)
-            return BadRequest(ModelState.CreateErrorResponse(request));
+            return BadRequest(ModelState.CreateErrorResponse());
 
         var response = await _handler.UpdateAsync(request);
 
@@ -116,7 +117,7 @@ public class CollaboratorsController : ControllerBase
     public async Task<ActionResult> GetAllAsync([FromQuery] PagedRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState.CreateErrorResponse(request));
+            return BadRequest(ModelState.CreateErrorResponse());
 
         var response = await _handler.GetAllAsync(request);
 

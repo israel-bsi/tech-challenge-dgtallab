@@ -1,8 +1,57 @@
 ﻿@page "/departamentos/editar/{id:int}"
+@using TechChallengeDgtallab.Core.Requests.Collaborator
+@using TechChallengeDgtallab.Core.Requests.Department
+@inherits EditDepartmentPage
 
-<DepartmentForm Id="@Id"/>
+<PageTitle>Editar Departamento</PageTitle>
 
-@code
+<MudText Typo="Typo.h4">Editar Departamento</MudText>
+
+@if (IsBusy)
 {
-    [Parameter] public int Id { get; set; }
+    <SkeletonWave />
+}
+else
+{
+    <MudPaper Class="pa-8 mt-4" Elevation="2">
+        <EditForm OnValidSubmit="OnValidSubmitAsync" Model="InputModel">
+            <ObjectGraphDataAnnotationsValidator />
+            <MudTextField T="string"
+                          Label="Nome do Departamento"
+                          @bind-Value="InputModel.Name"
+                          For="@(() => InputModel.Name)"
+                          InputType="InputType.Text"
+                          Class="mb-4" />
+
+            <MudSelect T="UpdateCollaboratorRequest"
+                       Label="Gerente"
+                       Value="InputModel.Manager"
+                       ValueChanged="OnSelectedManagerValueChanged"
+                       Class="mb-4">
+                @foreach (var collaborator in Collaborators)
+                {
+                    <MudSelectItem T="UpdateCollaboratorRequest" Value="@collaborator">@collaborator</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="SuperiorDepartmentRequest"
+                       Label="Departamento Superior"
+                       Value="InputModel.SuperiorDepartment"
+                       ValueChanged="OnSelectedSuperiorDepartmentValueChanged"
+                       Class="mb-4">
+                @foreach (var department in Departments)
+                {
+                    <MudSelectItem Value="@department">@department</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Class="mt-6"
+                       StartIcon="@Icons.Material.Filled.Save">
+                Salvar
+            </MudButton>
+        </EditForm>
+    </MudPaper>
 }

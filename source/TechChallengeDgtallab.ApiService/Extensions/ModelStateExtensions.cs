@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.ComponentModel.DataAnnotations;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.ApiService.Extensions;
@@ -8,26 +7,36 @@ public static class ModelStateExtensions
 {
     public static ErrorData CreateErrorResponse(
         this ModelStateDictionary modelState,
-        object model,
         int statusCode = 400,
         string? title = null)
     {
-        var context = new ValidationContext(model, serviceProvider: null, items: null);
-        var results = new List<ValidationResult>();
+        var errors = new List<Error>();
 
-        Validator.TryValidateObject(model, context, results, validateAllProperties: true);
-
-        var errors = results.Select(result => new Error
+        foreach (var kvp in modelState)
         {
-            Field = result.MemberNames.FirstOrDefault() ?? string.Empty,
-            Message = result.ErrorMessage ?? "Erro de validação"
-        }).ToList();
+            var fieldName = kvp.Key;
+            var modelStateEntry = kvp.Value;
+
+            if (modelStateEntry.Errors.Count > 0)
+            {
+                foreach (var error in modelStateEntry.Errors)
+                {
+                    errors.Add(new Error
+                    {
+                        Field = fieldName,
+                        Message = !string.IsNullOrEmpty(error.ErrorMessage)
+                            ? error.ErrorMessage
+                            : "Erro de validação"
+                    });
+                }
+            }
+        }
 
         return new ErrorData
         {
             HttpStatusCode = statusCode,
             Description = title ?? "Requisição inválida",
-            Errors = errors.ToList()
+            Errors = errors
         };
     }
 }

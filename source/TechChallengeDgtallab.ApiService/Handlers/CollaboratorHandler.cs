@@ -4,6 +4,7 @@ using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Models;
 using TechChallengeDgtallab.Core.Repositories;
 using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Collaborator;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.ApiService.Handlers;
@@ -23,7 +24,7 @@ public class CollaboratorHandler : ICollaboratorHandler
         _collaboratorService = collaboratorService;
     }
 
-    public async Task<Response<CollaboratorResponse>> AddAsync(EditCollaboratorRequest request)
+    public async Task<Response<CollaboratorResponse>> AddAsync(CreateCollaboratorRequest request)
     {
         try
         {
@@ -64,7 +65,7 @@ public class CollaboratorHandler : ICollaboratorHandler
         }
     }
 
-    public async Task<Response<CollaboratorResponse>> UpdateAsync(EditCollaboratorRequest request)
+    public async Task<Response<CollaboratorResponse>> UpdateAsync(UpdateCollaboratorRequest request)
     {
         try
         {

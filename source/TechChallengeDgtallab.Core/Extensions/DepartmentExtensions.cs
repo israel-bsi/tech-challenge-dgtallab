@@ -1,5 +1,6 @@
 ﻿using TechChallengeDgtallab.Core.Models;
-using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Collaborator;
+using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.Core.Extensions;
@@ -20,7 +21,8 @@ public static class DepartmentExtensions
                 item.Manager = new ManagerInDepartmentResponse
                 {
                     Id = department.Manager.Id,
-                    Name = department.Manager.Name
+                    Name = department.Manager.Name,
+                    Cpf = department.Manager.Cpf
                 };
 
             if (department.SuperiorDepartment is not null && department.SuperiorDepartment.Id > 0)
@@ -49,7 +51,8 @@ public static class DepartmentExtensions
             response.Manager = new ManagerInDepartmentResponse
             {
                 Id = department.Manager.Id,
-                Name = department.Manager.Name
+                Name = department.Manager.Name,
+                Cpf = department.Manager.Cpf
             };
         }
 
@@ -64,19 +67,26 @@ public static class DepartmentExtensions
         return response;
     }
 
-    public static IEnumerable<EditDepartmentRequest> ToRequest(this IEnumerable<DepartmentResponse> response)
+    public static IEnumerable<UpdateDepartmentRequest> ToRequest(this IEnumerable<DepartmentResponse> response)
     {
-        var requests = new List<EditDepartmentRequest>();
+        var requests = new List<UpdateDepartmentRequest>();
         foreach (var department in response)
         {
-            var item = new EditDepartmentRequest
+            var item = new UpdateDepartmentRequest
             {
                 Id = department.Id,
                 Name = department.Name,
                 ManagerId = department.Manager?.Id,
                 SuperiorDepartmentId = department.SuperiorDepartment?.Id,
+                SuperiorDepartment = department.SuperiorDepartment is not null
+                    ? new SuperiorDepartmentRequest
+                    {
+                        Id = department.SuperiorDepartment.Id,
+                        Name = department.SuperiorDepartment.Name
+                    }
+                    : null,
                 Manager = department.Manager is not null
-                    ? new EditCollaboratorRequest
+                    ? new UpdateCollaboratorRequest
                     {
                         Id = department.Manager.Id,
                         Name = department.Manager.Name
@@ -103,7 +113,7 @@ public static class DepartmentExtensions
         return requests;
     }
 
-    public static Department ToEntity(this EditDepartmentRequest request)
+    public static Department ToEntity(this UpdateDepartmentRequest request)
     {
         return new Department
         {

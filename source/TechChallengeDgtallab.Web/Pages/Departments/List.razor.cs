@@ -3,13 +3,14 @@ using MudBlazor;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
+using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Web.Components;
 
 namespace TechChallengeDgtallab.Web.Pages.Departments
 {
     public partial class ListDepartmentPage : ComponentBase
     {
-        public MudDataGrid<EditDepartmentRequest> DataGrid { get; set; } = null!;
+        public MudDataGrid<UpdateDepartmentRequest> DataGrid { get; set; } = null!;
 
         private string _searchTerm = string.Empty;
 
@@ -30,7 +31,7 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
 
         [Inject] public IDepartmentHandler Handler { get; set; } = null!;
 
-        public async Task<GridData<EditDepartmentRequest>> LoadServerData(GridState<EditDepartmentRequest> state)
+        public async Task<GridData<UpdateDepartmentRequest>> LoadServerData(GridState<UpdateDepartmentRequest> state)
         {
             try
             {
@@ -44,7 +45,7 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
                 var response = await Handler.GetAllAsync(request);
                 if (response.IsSuccess)
                 {
-                    return new GridData<EditDepartmentRequest>
+                    return new GridData<UpdateDepartmentRequest>
                     {
                         Items = response.Data?.ToRequest() ?? [],
                         TotalItems = response.TotalCount
@@ -52,7 +53,7 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
                 }
 
                 Snackbar.Add(response.Message ?? string.Empty, Severity.Error);
-                return new GridData<EditDepartmentRequest>
+                return new GridData<UpdateDepartmentRequest>
                 {
                     Items = [],
                     TotalItems = 0
@@ -61,7 +62,7 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
             catch (Exception e)
             {
                 Snackbar.Add(e.Message, Severity.Error);
-                return new GridData<EditDepartmentRequest>
+                return new GridData<UpdateDepartmentRequest>
                 {
                     Items = [],
                     TotalItems = 0
