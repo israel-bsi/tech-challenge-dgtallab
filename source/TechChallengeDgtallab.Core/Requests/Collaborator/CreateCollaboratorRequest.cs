@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TechChallengeDgtallab.Core.Requests.Department;
+using TechChallengeDgtallab.Core.DTOs;
 
 namespace TechChallengeDgtallab.Core.Requests.Collaborator;
 

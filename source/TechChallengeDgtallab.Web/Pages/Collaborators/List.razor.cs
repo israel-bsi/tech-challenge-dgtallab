@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using TechChallengeDgtallab.Core.DTOs;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
-using TechChallengeDgtallab.Core.Requests.Collaborator;
-using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Web.Components;
 
 namespace TechChallengeDgtallab.Web.Pages.Collaborators;

@@ -15,8 +15,8 @@ public class DepartmentHandler : IDepartmentHandler
     private readonly ICollaboratorRepository _collaboratorRepository;
     private readonly DepartmentService _departmentService;
 
-    public DepartmentHandler(IDepartmentRepository departmentRepository, 
-        ICollaboratorRepository collaboratorRepository, 
+    public DepartmentHandler(IDepartmentRepository departmentRepository,
+        ICollaboratorRepository collaboratorRepository,
         DepartmentService departmentService)
     {
         _departmentRepository = departmentRepository;
@@ -31,7 +31,7 @@ public class DepartmentHandler : IDepartmentHandler
             if (request.SuperiorDepartmentId.HasValue)
             {
                 var superiorDepartment = await _departmentRepository
-                    .GetByIdAsync(request.SuperiorDepartmentId.Value);
+                    .GetByIdAsync(request.SuperiorDepartmentId.Value, true);
 
                 if (superiorDepartment.Data is null)
                     return new Response<DepartmentResponse>(null, 404, "Departamento superior não encontrado.");
@@ -59,13 +59,13 @@ public class DepartmentHandler : IDepartmentHandler
     {
         try
         {
-            var department = await _departmentRepository.GetByIdAsync(request.Id);
+            var department = await _departmentRepository.GetByIdAsync(request.Id, false);
             if (department.Data is null)
                 return new Response<DepartmentResponse>(null, 404, "Departamento superior não encontrado.");
 
             if (request.ManagerId.HasValue)
             {
-                var manager = await _collaboratorRepository.GetByIdAsync(request.ManagerId.Value);
+                var manager = await _collaboratorRepository.GetByIdAsync(request.ManagerId.Value, false);
                 if (manager.Data is null)
                     return new Response<DepartmentResponse>(null, 404, "Gerente não encontrado.");
 
@@ -75,12 +75,15 @@ public class DepartmentHandler : IDepartmentHandler
 
             if (request.SuperiorDepartmentId.HasValue)
             {
-                var superiorDepartment = await _departmentRepository.GetByIdAsync(request.SuperiorDepartmentId.Value);
+                var superiorDepartment = await _departmentRepository.GetByIdAsync(request.SuperiorDepartmentId.Value, false);
                 if (superiorDepartment.Data is null)
                     return new Response<DepartmentResponse>(null, 404, "Departamento superior não encontrado.");
             }
 
-            department.Data = request.ToEntity();
+            department.Data.Name = request.Name;
+            department.Data.ManagerId = request.ManagerId;
+            department.Data.SuperiorDepartmentId = request.SuperiorDepartmentId;
+            department.Data.UpdatedAt = DateTime.UtcNow;
 
             var result = await _departmentRepository.UpdateAsync(department.Data);
             return new Response<DepartmentResponse>(result.Data?.ToResponse(), 200, "Departamento atualizado com sucesso!");
@@ -95,14 +98,14 @@ public class DepartmentHandler : IDepartmentHandler
     {
         try
         {
-            var department = await _departmentRepository.GetByIdAsync(id);
+            var department = await _departmentRepository.GetByIdAsync(id, false);
             if (department.Data is null)
                 return new Response<DepartmentResponse>(null, 404, "Departamento não encontrado.");
 
             department.Data.IsActive = false;
             department.Data.UpdatedAt = DateTime.UtcNow;
 
-            await _departmentRepository.DeleteAsync(department.Data);
+            await _departmentRepository.UpdateAsync(department.Data);
 
             return new Response<DepartmentResponse>(null, 204, "Departamento excluído com sucesso!");
         }
@@ -116,7 +119,7 @@ public class DepartmentHandler : IDepartmentHandler
     {
         try
         {
-            var department = await _departmentRepository.GetByIdAsync(id);
+            var department = await _departmentRepository.GetByIdAsync(id, true);
 
             return department.Data is null
                 ? new Response<DepartmentResponse>(null, 404, "Departamento não encontrado.")
@@ -140,7 +143,7 @@ public class DepartmentHandler : IDepartmentHandler
             var hierarchyList = new List<Department> { rootDepartment };
             _departmentService.GetSubordinateDepartments(id, allDepartments, hierarchyList);
 
-            return new Response<IEnumerable<DepartmentResponse>>(hierarchyList.ToResponse());
+            return new Response<IEnumerable<DepartmentResponse>>(hierarchyList.Select(h => h.ToResponse()));
         }
         catch (Exception e)
         {
@@ -154,7 +157,7 @@ public class DepartmentHandler : IDepartmentHandler
         {
             var departments = await _departmentRepository.GetAllAsync(request);
 
-            var response = departments.Data?.ToResponse();
+            var response = departments.Data?.Select(d => d.ToResponse());
 
             return new PagedResponse<IEnumerable<DepartmentResponse>>(response, departments.TotalCount, request.PageNumber, request.PageSize);
         }

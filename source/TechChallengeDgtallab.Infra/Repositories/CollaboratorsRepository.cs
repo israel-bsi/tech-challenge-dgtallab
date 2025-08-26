@@ -34,44 +34,23 @@ public class CollaboratorsRepository : ICollaboratorRepository
 
     public async Task<Response<Collaborator>> UpdateAsync(Collaborator request)
     {
-        var department = await _dbContext
-            .Departments
-            .FirstAsync(d => d.Id == request.DepartmentId && d.IsActive);
-
-        _dbContext.Attach(department);
-        request.Department = department;
-
-        var existingEntity = _dbContext.ChangeTracker.Entries<Collaborator>()
-            .FirstOrDefault(e => e.Entity.Id == request.Id);
-
-        if (existingEntity != null)
-            existingEntity.CurrentValues.SetValues(request);
-        else
-            _dbContext.Collaborators.Update(request);
-
         await _dbContext.SaveChangesAsync();
-
-        await _dbContext.Entry(request).Reference(c => c.Department).LoadAsync();
 
         return new Response<Collaborator>(request);
     }
 
-    public async Task<Response<Collaborator>> DeleteAsync(Collaborator collaborator)
+    public async Task<Response<Collaborator>> GetByIdAsync(int id, bool readOnly)
     {
-        _dbContext.Collaborators.Update(collaborator);
-        await _dbContext.SaveChangesAsync();
-
-        return new Response<Collaborator>();
-    }
-
-    public async Task<Response<Collaborator>> GetByIdAsync(int id)
-    {
-        var collaborator = await _dbContext
+        var query = _dbContext
             .Collaborators
             .Include(c => c.Department)
             .ThenInclude(d => d.Manager)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive);
+            .Where(c => c.Id == id && c.IsActive);
+
+        if (readOnly)
+            query = query.AsNoTracking();
+
+        var collaborator = await query.FirstOrDefaultAsync();
 
         return new Response<Collaborator>(collaborator);
     }
@@ -117,6 +96,7 @@ public class CollaboratorsRepository : ICollaboratorRepository
         var query = _dbContext
             .Collaborators
             .Include(c => c.Department)
+            .ThenInclude(d => d.Manager)
             .AsNoTracking()
             .Where(c => c.IsActive)
             .OrderByDescending(c => c.CreatedAt);

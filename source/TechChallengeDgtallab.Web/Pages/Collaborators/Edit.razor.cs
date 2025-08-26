@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using TechChallengeDgtallab.Core.DTOs;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
 using TechChallengeDgtallab.Core.Requests.Collaborator;
-using TechChallengeDgtallab.Core.Requests.Department;
 
 namespace TechChallengeDgtallab.Web.Pages.Collaborators;
 
@@ -90,9 +90,7 @@ public partial class EditCollaboratorPage : ComponentBase
             var request = new PagedRequest { PageNumber = 1, PageSize = 1000 };
             var result = await DepartmentHandler.GetAllAsync(request);
             if (result.IsSuccess)
-                Departments = result
-                    .Data?
-                    .ToDto() ?? [];
+                Departments = result.Data?.Select(d => d.ToDto()) ?? [];
             else
                 Snackbar.Add(result.Message ?? "Erro ao obter departamentos", Severity.Error);
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using TechChallengeDgtallab.Core.DTOs;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
@@ -10,7 +11,7 @@ namespace TechChallengeDgtallab.Web.Pages.Departments;
 public partial class CreateDepartmentPage : ComponentBase
 {
     public CreateDepartmentRequest InputModel { get; set; } = new();
-    public IEnumerable<SuperiorDepartmentRequest> Departments { get; set; } = [];
+    public IEnumerable<DepartmentDto> Departments { get; set; } = [];
     public bool IsBusy { get; set; }
 
     [Inject] public IDepartmentHandler DepartmentHandler { get; set; } = null!;
@@ -53,9 +54,7 @@ public partial class CreateDepartmentPage : ComponentBase
             var request = new PagedRequest { PageNumber = 1, PageSize = 1000 };
             var result = await DepartmentHandler.GetAllAsync(request);
             if (result.IsSuccess)
-                Departments = result
-                    .Data?
-                    .ToSuperiorRequest() ?? [];
+                Departments = result.Data?.Select(d => d.ToDto()) ?? [];
             else
                 Snackbar.Add(result.Message ?? "Erro ao obter departamentos", Severity.Error);
         }
@@ -69,7 +68,7 @@ public partial class CreateDepartmentPage : ComponentBase
         }
     }
 
-    public void OnSelectedSuperiorDepartmentValueChanged(SuperiorDepartmentRequest newValue)
+    public void OnSelectedSuperiorDepartmentValueChanged(DepartmentDto newValue)
     {
         InputModel.SuperiorDepartmentId = newValue.Id;
         InputModel.SuperiorDepartment = newValue;

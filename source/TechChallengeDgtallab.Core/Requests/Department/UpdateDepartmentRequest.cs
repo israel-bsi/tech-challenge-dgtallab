@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TechChallengeDgtallab.Core.Requests.Collaborator;
+using TechChallengeDgtallab.Core.DTOs;
 
 namespace TechChallengeDgtallab.Core.Requests.Department;
 
@@ -11,10 +11,10 @@ public class UpdateDepartmentRequest
     public string Name { get; set; } = string.Empty;
 
     [ValidateComplexType(ErrorMessage = "Gerente inválido")]
-    public UpdateCollaboratorRequest? Manager { get; set; }
+    public CollaboratorDto? Manager { get; set; }
     public int? ManagerId { get; set; }
 
-    public SuperiorDepartmentRequest? SuperiorDepartment { get; set; }
+    public DepartmentDto? SuperiorDepartment { get; set; }
     public int? SuperiorDepartmentId { get; set; }
 
     public override string ToString() => Name;

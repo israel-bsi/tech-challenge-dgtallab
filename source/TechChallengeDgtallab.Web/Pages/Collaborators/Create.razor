@@ -1,4 +1,5 @@
 ﻿@page "/colaboradores/adicionar"
+@using TechChallengeDgtallab.Core.DTOs
 @using TechChallengeDgtallab.Core.Requests.Collaborator
 @using TechChallengeDgtallab.Core.Requests.Department
 @inherits CreateCollaboratorPage
@@ -22,21 +23,24 @@ else
                           @bind-Value="InputModel.Name"
                           For="@(() => InputModel.Name)"
                           InputType="InputType.Text"
-                          Class="mb-4" />
+                          Class="mb-4" 
+                          MaxLength="100"/>
 
             <MudTextField T="string"
                           Label="CPF"
                           @bind-Value="InputModel.Cpf"
                           For="@(() => InputModel.Cpf)"
                           InputType="InputType.Text"
-                          Class="mb-4" />
+                          Class="mb-4" 
+                          MaxLength="11"/>
 
             <MudTextField T="string"
                           Label="RG"
                           @bind-Value="InputModel.Rg"
                           For="@(() => InputModel.Rg)"
                           InputType="InputType.Text"
-                          Class="mb-4" />
+                          Class="mb-4" 
+                          MaxLength="20"/>
 
             <MudSelect T="DepartmentDto"
                        Label="Departamento"

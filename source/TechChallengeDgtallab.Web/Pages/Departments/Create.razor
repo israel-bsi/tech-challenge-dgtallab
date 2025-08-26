@@ -1,4 +1,5 @@
 ﻿@page "/departamentos/adicionar"
+@using TechChallengeDgtallab.Core.DTOs
 @using TechChallengeDgtallab.Core.Requests.Department
 @inherits CreateDepartmentPage
 
@@ -20,9 +21,10 @@ else
                           @bind-Value="InputModel.Name"
                           For="@(() => InputModel.Name)"
                           InputType="InputType.Text"
-                          Class="mb-4" />
+                          Class="mb-4" 
+                          MaxLength="100"/>
 
-            <MudSelect T="SuperiorDepartmentRequest"
+            <MudSelect T="DepartmentDto"
                        Label="Departamento Superior"
                        Value="InputModel.SuperiorDepartment"
                        ValueChanged="OnSelectedSuperiorDepartmentValueChanged"

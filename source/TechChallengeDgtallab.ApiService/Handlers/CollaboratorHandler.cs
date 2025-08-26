@@ -15,8 +15,8 @@ public class CollaboratorHandler : ICollaboratorHandler
     private readonly IDepartmentRepository _departmentRepository;
     private readonly CollaboratorService _collaboratorService;
 
-    public CollaboratorHandler(ICollaboratorRepository collaboratorRepository, 
-        IDepartmentRepository departmentRepository, 
+    public CollaboratorHandler(ICollaboratorRepository collaboratorRepository,
+        IDepartmentRepository departmentRepository,
         CollaboratorService collaboratorService)
     {
         _collaboratorRepository = collaboratorRepository;
@@ -28,7 +28,7 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var departmentResult = await _departmentRepository.GetByIdAsync(request.DepartmentId);
+            var departmentResult = await _departmentRepository.GetByIdAsync(request.DepartmentId, true);
             if (departmentResult.Data is null)
                 return new Response<CollaboratorResponse>(null, 404, "Departamento não encontrado.");
 
@@ -55,8 +55,8 @@ public class CollaboratorHandler : ICollaboratorHandler
             };
 
             var result = await _collaboratorRepository.AddAsync(entity);
-            return result.IsSuccess 
-                ? new Response<CollaboratorResponse>(result.Data?.ToResponse(), 201, "Colaborador cadastrado com sucesso!") 
+            return result.IsSuccess
+                ? new Response<CollaboratorResponse>(result.Data?.ToResponse(), 201, "Colaborador cadastrado com sucesso!")
                 : new Response<CollaboratorResponse>(null, 500, "Erro ao cadastrar colaborador.");
         }
         catch (Exception e)
@@ -69,11 +69,11 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var collaborator = await _collaboratorRepository.GetByIdAsync(request.Id);
+            var collaborator = await _collaboratorRepository.GetByIdAsync(request.Id, false);
             if (collaborator.Data is null)
                 return new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.");
 
-            var departmentResult = await _departmentRepository.GetByIdAsync(request.DepartmentId);
+            var departmentResult = await _departmentRepository.GetByIdAsync(request.DepartmentId, false);
             if (departmentResult.Data is null)
                 return new Response<CollaboratorResponse>(null, 404, "Departamento não encontrado.");
 
@@ -91,12 +91,26 @@ public class CollaboratorHandler : ICollaboratorHandler
                     return new Response<CollaboratorResponse>(null, 409, "RG já cadastrado.");
             }
 
-            collaborator.Data = request.ToEntity();
+            var originalDepartmentId = collaborator.Data.DepartmentId;
+
+            collaborator.Data.Name = request.Name;
+            collaborator.Data.Cpf = request.Cpf;
+            collaborator.Data.Rg = request.Rg;
+            collaborator.Data.DepartmentId = request.DepartmentId;
+            collaborator.Data.UpdatedAt = DateTime.UtcNow;
+
+            if (originalDepartmentId != collaborator.Data.DepartmentId)
+            {
+                var oldManagedDepartment = await _departmentRepository.GetByManagerIdAsync(collaborator.Data.Id);
+
+                if (oldManagedDepartment.Data is not null) 
+                    oldManagedDepartment.Data.ManagerId = null;
+            }
 
             var result = await _collaboratorRepository.UpdateAsync(collaborator.Data);
-            return result.IsSuccess 
-                ? new Response<CollaboratorResponse>(result.Data?.ToResponse(), 200, "Colaborador atualizado com sucesso!") 
-                : new Response<CollaboratorResponse>(null, 500, "Erro ao atualizar colaborador.");
+            return result.IsSuccess ? 
+                new Response<CollaboratorResponse>(result.Data?.ToResponse(), 200, "Colaborador atualizado com sucesso!") :
+                new Response<CollaboratorResponse>(null, 500, "Erro ao atualizar colaborador.");
         }
         catch (Exception e)
         {
@@ -108,14 +122,14 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var entity = await _collaboratorRepository.GetByIdAsync(id);
+            var entity = await _collaboratorRepository.GetByIdAsync(id, false);
             if (entity.Data is null)
                 return new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.");
 
             entity.Data.IsActive = false;
             entity.Data.UpdatedAt = DateTime.UtcNow;
 
-            await _collaboratorRepository.DeleteAsync(entity.Data);
+            await _collaboratorRepository.UpdateAsync(entity.Data);
             return new Response<CollaboratorResponse>(null, 204, "Colaborador deletado com sucesso!");
         }
         catch (Exception e)
@@ -128,10 +142,10 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var entity = await _collaboratorRepository.GetByIdAsync(id);
+            var entity = await _collaboratorRepository.GetByIdAsync(id, true);
 
-            return entity.Data is null 
-                ? new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.") 
+            return entity.Data is null
+                ? new Response<CollaboratorResponse>(null, 404, "Colaborador não encontrado.")
                 : new Response<CollaboratorResponse>(entity.Data.ToResponse(), 200, "Colaborador encontrado com sucesso!");
         }
         catch (Exception e)
@@ -144,7 +158,7 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var managerResult = await _collaboratorRepository.GetByIdAsync(managerId);
+            var managerResult = await _collaboratorRepository.GetByIdAsync(managerId, true);
             if (managerResult.Data == null)
                 return new Response<IEnumerable<CollaboratorResponse>>(null, 404, "Gerente não encontrado.");
 
@@ -164,7 +178,7 @@ public class CollaboratorHandler : ICollaboratorHandler
             if (collaboratorsResult.Data == null)
                 return new Response<IEnumerable<CollaboratorResponse>>(null, 200, "Nenhum colaborador subordinado encontrado.");
 
-            var response = collaboratorsResult.Data.ToResponse();
+            var response = collaboratorsResult.Data.Select(c => c.ToResponse());
             return new Response<IEnumerable<CollaboratorResponse>>(response, 200, "Colaboradores subordinados encontrados com sucesso!");
         }
         catch (Exception e)
@@ -177,7 +191,7 @@ public class CollaboratorHandler : ICollaboratorHandler
     {
         try
         {
-            var departmentResult = await _departmentRepository.GetByIdAsync(departmentId);
+            var departmentResult = await _departmentRepository.GetByIdAsync(departmentId, true);
             if (departmentResult.Data is null)
                 return new Response<IEnumerable<CollaboratorResponse>>(null, 404, "Departamento não encontrado.");
 
@@ -185,7 +199,7 @@ public class CollaboratorHandler : ICollaboratorHandler
             if (collaboratorsResult.Data is null || !collaboratorsResult.Data.Any())
                 return new Response<IEnumerable<CollaboratorResponse>>(null, 200, "Nenhum colaborador encontrado para o departamento informado.");
 
-            var response = collaboratorsResult.Data.ToResponse();
+            var response = collaboratorsResult.Data.Select(c => c.ToResponse());
             return new Response<IEnumerable<CollaboratorResponse>>(response, 200, "Colaboradores encontrados com sucesso!");
         }
         catch (Exception e)
@@ -200,7 +214,7 @@ public class CollaboratorHandler : ICollaboratorHandler
         {
             var result = await _collaboratorRepository.GetAllAsync(request);
 
-            var response = result.Data?.ToResponse();
+            var response = result.Data?.Select(c => c.ToResponse());
 
             return new PagedResponse<IEnumerable<CollaboratorResponse>>(response, result.TotalCount, request.PageNumber, request.PageSize);
         }

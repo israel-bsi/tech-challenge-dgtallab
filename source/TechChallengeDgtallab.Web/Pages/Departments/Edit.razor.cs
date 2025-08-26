@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using TechChallengeDgtallab.Core.DTOs;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
-using TechChallengeDgtallab.Core.Requests.Collaborator;
 using TechChallengeDgtallab.Core.Requests.Department;
 
 namespace TechChallengeDgtallab.Web.Pages.Departments;
@@ -12,8 +12,8 @@ public partial class EditDepartmentPage : ComponentBase
 {
     [Parameter] public int Id { get; set; }
     public UpdateDepartmentRequest InputModel { get; set; } = new();
-    public IEnumerable<UpdateCollaboratorRequest> Collaborators { get; set; } = [];
-    public IEnumerable<SuperiorDepartmentRequest> Departments { get; set; } = [];
+    public IEnumerable<CollaboratorDto> Collaborators { get; set; } = [];
+    public IEnumerable<DepartmentDto> Departments { get; set; } = [];
     public bool IsBusy { get; set; }
 
     [Inject] public IDepartmentHandler DepartmentHandler { get; set; } = null!;
@@ -61,7 +61,7 @@ public partial class EditDepartmentPage : ComponentBase
                 InputModel.Id = result.Data.Id;
                 InputModel.Name = result.Data.Name;
                 InputModel.ManagerId = result.Data.Manager?.Id;
-                InputModel.Manager = new UpdateCollaboratorRequest
+                InputModel.Manager = new CollaboratorDto
                 {
                     Id = result.Data.Manager?.Id ?? 0,
                     Cpf = result.Data.Manager?.Cpf ?? string.Empty,
@@ -69,7 +69,7 @@ public partial class EditDepartmentPage : ComponentBase
                     DepartmentId = Id
                 };
                 InputModel.SuperiorDepartmentId = result.Data.SuperiorDepartment?.Id;
-                InputModel.SuperiorDepartment = new SuperiorDepartmentRequest
+                InputModel.SuperiorDepartment = new DepartmentDto
                 {
                     Id = result.Data.SuperiorDepartment?.Id ?? 0,
                     Name = result.Data.SuperiorDepartment?.Name ?? string.Empty
@@ -100,7 +100,7 @@ public partial class EditDepartmentPage : ComponentBase
         {
             var result = await CollaboratorHandler.GetCollaboratorsByDepartment(InputModel.Id);
             if (result.IsSuccess)
-                Collaborators = result.Data?.ToRequest() ?? [];
+                Collaborators = result.Data?.Select(c => c.ToDto()) ?? [];
             else
                 Snackbar.Add(result.Message ?? "Erro ao obter colaboradores", Severity.Error);
         }
@@ -122,10 +122,9 @@ public partial class EditDepartmentPage : ComponentBase
             var request = new PagedRequest { PageNumber = 1, PageSize = 1000 };
             var result = await DepartmentHandler.GetAllAsync(request);
             if (result.IsSuccess)
-                Departments = result
-                    .Data?
-                    .ToSuperiorRequest()
-                    .Where(d => d.Id != InputModel.Id) ?? [];
+                Departments = result.Data?
+                   .Select(d => d.ToDto())
+                   .Where(d => d.Id != InputModel.Id) ?? [];
             else
                 Snackbar.Add(result.Message ?? "Erro ao obter departamentos", Severity.Error);
         }
@@ -139,13 +138,13 @@ public partial class EditDepartmentPage : ComponentBase
         }
     }
 
-    public void OnSelectedManagerValueChanged(UpdateCollaboratorRequest newValue)
+    public void OnSelectedManagerValueChanged(CollaboratorDto newValue)
     {
         InputModel.ManagerId = newValue.Id;
         InputModel.Manager = newValue;
     }
 
-    public void OnSelectedSuperiorDepartmentValueChanged(SuperiorDepartmentRequest newValue)
+    public void OnSelectedSuperiorDepartmentValueChanged(DepartmentDto newValue)
     {
         InputModel.SuperiorDepartmentId = newValue.Id;
         InputModel.SuperiorDepartment = newValue;

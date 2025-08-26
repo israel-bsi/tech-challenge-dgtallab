@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using TechChallengeDgtallab.Core.DTOs;
 using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
-using TechChallengeDgtallab.Core.Requests.Department;
 using TechChallengeDgtallab.Web.Components;
 
 namespace TechChallengeDgtallab.Web.Pages.Departments
 {
     public partial class ListDepartmentPage : ComponentBase
     {
-        public MudDataGrid<UpdateDepartmentRequest> DataGrid { get; set; } = null!;
+        public MudDataGrid<DepartmentDto> DataGrid { get; set; } = null!;
 
         private string _searchTerm = string.Empty;
 
@@ -31,7 +31,7 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
 
         [Inject] public IDepartmentHandler Handler { get; set; } = null!;
 
-        public async Task<GridData<UpdateDepartmentRequest>> LoadServerData(GridState<UpdateDepartmentRequest> state)
+        public async Task<GridData<DepartmentDto>> LoadServerData(GridState<DepartmentDto> state)
         {
             try
             {
@@ -45,15 +45,15 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
                 var response = await Handler.GetAllAsync(request);
                 if (response.IsSuccess)
                 {
-                    return new GridData<UpdateDepartmentRequest>
+                    return new GridData<DepartmentDto>
                     {
-                        Items = response.Data?.ToRequest() ?? [],
+                        Items = response.Data?.Select(d => d.ToDto()) ?? [],
                         TotalItems = response.TotalCount
                     };
                 }
 
                 Snackbar.Add(response.Message ?? string.Empty, Severity.Error);
-                return new GridData<UpdateDepartmentRequest>
+                return new GridData<DepartmentDto>
                 {
                     Items = [],
                     TotalItems = 0
@@ -62,7 +62,7 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
             catch (Exception e)
             {
                 Snackbar.Add(e.Message, Severity.Error);
-                return new GridData<UpdateDepartmentRequest>
+                return new GridData<DepartmentDto>
                 {
                     Items = [],
                     TotalItems = 0

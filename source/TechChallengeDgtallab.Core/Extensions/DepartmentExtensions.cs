@@ -1,43 +1,11 @@
-﻿using TechChallengeDgtallab.Core.Models;
-using TechChallengeDgtallab.Core.Requests.Collaborator;
-using TechChallengeDgtallab.Core.Requests.Department;
+﻿using TechChallengeDgtallab.Core.DTOs;
+using TechChallengeDgtallab.Core.Models;
 using TechChallengeDgtallab.Core.Responses;
 
 namespace TechChallengeDgtallab.Core.Extensions;
 
 public static class DepartmentExtensions
 {
-    public static IEnumerable<DepartmentResponse> ToResponse(this IEnumerable<Department> departments)
-    {
-        var response = new List<DepartmentResponse>();
-        foreach (var department in departments)
-        {
-            var item = new DepartmentResponse
-            {
-                Id = department.Id,
-                Name = department.Name
-            };
-            if (department.Manager is { Id: > 0 })
-                item.Manager = new ManagerInDepartmentResponse
-                {
-                    Id = department.Manager.Id,
-                    Name = department.Manager.Name,
-                    Cpf = department.Manager.Cpf
-                };
-
-            if (department.SuperiorDepartment is not null && department.SuperiorDepartment.Id > 0)
-                item.SuperiorDepartment = new DepartmentInCollaboratorResponse
-                {
-                    Id = department.SuperiorDepartment.Id,
-                    Name = department.SuperiorDepartment.Name
-                };
-
-            response.Add(item);
-        }
-
-        return response;
-    }
-
     public static DepartmentResponse ToResponse(this Department department)
     {
         var response = new DepartmentResponse
@@ -48,98 +16,42 @@ public static class DepartmentExtensions
 
         if (department.Manager is { Id: > 0 })
         {
-            response.Manager = new ManagerInDepartmentResponse
+            response.Manager = new CollaboratorDto
             {
                 Id = department.Manager.Id,
                 Name = department.Manager.Name,
-                Cpf = department.Manager.Cpf
+                Cpf = department.Manager.Cpf, 
+                Manager = department.Manager.Name,
+                Department = department.Name,
+                DepartmentId = department.Id,
+                Rg = department.Manager.Rg ?? string.Empty
             };
         }
 
         if (department.SuperiorDepartment is { Id: > 0 })
         {
-            response.SuperiorDepartment = new DepartmentInCollaboratorResponse
+            response.SuperiorDepartment = new DepartmentDto
             {
                 Id = department.SuperiorDepartment.Id,
-                Name = department.SuperiorDepartment.Name
+                Name = department.SuperiorDepartment.Name,
+                Manager = department.Manager?.Name ?? string.Empty,
+                ManagerId = department.ManagerId
             };
         }
         return response;
     }
 
-    public static IEnumerable<UpdateDepartmentRequest> ToRequest(this IEnumerable<DepartmentResponse> response)
+    public static DepartmentDto ToDto(this DepartmentResponse response)
     {
-        var requests = new List<UpdateDepartmentRequest>();
-        foreach (var department in response)
+        var dto = new DepartmentDto
         {
-            var item = new UpdateDepartmentRequest
-            {
-                Id = department.Id,
-                Name = department.Name,
-                ManagerId = department.Manager?.Id,
-                SuperiorDepartmentId = department.SuperiorDepartment?.Id,
-                SuperiorDepartment = department.SuperiorDepartment is not null
-                    ? new SuperiorDepartmentRequest
-                    {
-                        Id = department.SuperiorDepartment.Id,
-                        Name = department.SuperiorDepartment.Name
-                    }
-                    : null,
-                Manager = department.Manager is not null
-                    ? new UpdateCollaboratorRequest
-                    {
-                        Id = department.Manager.Id,
-                        Name = department.Manager.Name
-                    }
-                    : null,
-            };
-            requests.Add(item);
-        }
-        return requests;
-    }
-
-    public static IEnumerable<SuperiorDepartmentRequest> ToSuperiorRequest(this IEnumerable<DepartmentResponse> response)
-    {
-        var requests = new List<SuperiorDepartmentRequest>();
-        foreach (var department in response)
-        {
-            var item = new SuperiorDepartmentRequest
-            {
-                Id = department.Id,
-                Name = department.Name
-            };
-            requests.Add(item);
-        }
-        return requests;
-    }
-
-    public static IEnumerable<DepartmentDto> ToDto(this IEnumerable<DepartmentResponse> response)
-    {
-        var dtos = new List<DepartmentDto>();
-        foreach (var department in response)
-        {
-            var item = new DepartmentDto
-            {
-                Id = department.Id,
-                Name = department.Name
-            };
-            dtos.Add(item);
-        }
-        return dtos;
-    }
-
-    public static Department ToEntity(this UpdateDepartmentRequest request)
-    {
-        return new Department
-        {
-            Id = request.Id,
-            Name = request.Name,
-            SuperiorDepartmentId = request.SuperiorDepartmentId,
-            SuperiorDepartment = null,
-            ManagerId = request.ManagerId,
-            Manager = null,
-            IsActive = true,
-            UpdatedAt = DateTime.UtcNow
+            Id = response.Id,
+            Name = response.Name,
+            ManagerId = response.Manager?.Id ?? 0,
+            Manager = response.Manager?.Name ?? string.Empty,
+            SuperiorDepartment = response.SuperiorDepartment?.Name ?? string.Empty,
+            SuperiorDepartmentId = response.SuperiorDepartment?.Id
         };
+        return dto;
     }
 }

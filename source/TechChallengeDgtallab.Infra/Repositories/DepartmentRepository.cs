@@ -29,45 +29,35 @@ public class DepartmentRepository : IDepartmentRepository
 
     public async Task<Response<Department>> UpdateAsync(Department department)
     {
-        var existingEntity = _dbContext.ChangeTracker.Entries<Department>()
-            .FirstOrDefault(e => e.Entity.Id == department.Id);
-
-        if (existingEntity != null)
-            existingEntity.CurrentValues.SetValues(department);
-        else
-            _dbContext.Departments.Update(department);
-
         await _dbContext.SaveChangesAsync();
-
-        department = await _dbContext
-            .Departments
-            .Include(d => d.Manager)
-            .Include(d => d.SuperiorDepartment)
-            .AsNoTracking()
-            .FirstAsync(d => d.Id == department.Id);
 
         return new Response<Department>(department);
     }
 
-    public async Task<Response<Department>> DeleteAsync(Department department)
+    public async Task<Response<Department>> GetByIdAsync(int id, bool readOnly)
     {
-        _dbContext.Departments.Update(department);
-        await _dbContext.SaveChangesAsync();
-
-        return new Response<Department>();
-    }
-
-    public async Task<Response<Department>> GetByIdAsync(int id)
-    {
-        var department = await _dbContext
+        var query = _dbContext
             .Departments
             .Include(c => c.Manager)
             .Include(c => c.SuperiorDepartment)
             .ThenInclude(d => d.Manager)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(d => d.Id == id && d.IsActive);
+            .Where(d => d.Id == id && d.IsActive);
+
+        if (readOnly)
+            query = query.AsNoTracking();
+        
+        var department = await query.FirstOrDefaultAsync();
 
         return new Response<Department>(department);
+    }
+
+    public async Task<Response<Department>> GetByManagerIdAsync(int managerId)
+    {
+        var manager = await _dbContext
+            .Departments
+            .FirstOrDefaultAsync(d => d.ManagerId == managerId && d.IsActive);
+
+        return new Response<Department>(manager);
     }
 
     public async Task<(Response<List<Department>>, Response<Department>)> GetDepartmentHierarchyAsync(int id)

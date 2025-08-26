@@ -8,8 +8,7 @@ public interface ICollaboratorRepository
 {
     Task<Response<Collaborator>> AddAsync(Collaborator collaborator);
     Task<Response<Collaborator>> UpdateAsync(Collaborator request);
-    Task<Response<Collaborator>> DeleteAsync(Collaborator collaborator);
-    Task<Response<Collaborator>> GetByIdAsync(int id);
+    Task<Response<Collaborator>> GetByIdAsync(int id, bool readOnly);
     Task<Response<Collaborator>> GetByCpfAsync(string cpf);
     Task<Response<Collaborator>> GetByRgAsync(string rg);
     Task<Response<IEnumerable<Department>>> GetAllDepartmentsAsync();
