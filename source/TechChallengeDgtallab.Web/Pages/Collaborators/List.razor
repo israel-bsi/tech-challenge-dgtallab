@@ -1,5 +1,65 @@
-﻿<h3>List</h3>
+﻿@page "/colaboradores"
+@using TechChallengeDgtallab.Core.Requests.Collaborator
+@inherits ListCollaboratorPage
 
-@code {
+<MudText Typo="Typo.h3">Colaboradores</MudText>
 
-}
+<PageTitle>Colaboradores</PageTitle>
+
+<div class="d-flex justify-end">
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.PersonAdd"
+               Href="/colaboradores/adicionar">
+        Novo Colaborador
+    </MudButton>
+</div>
+
+<MudDataGrid T="CollaboratorDto"
+             Class="mt-4"
+             ServerData="LoadServerData"
+             @ref="DataGrid"
+             RowsPerPage="@Core.Configuration.DefaultPageSize">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Departamentos</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="SearchTerm"
+                      Placeholder="Filtrar por Nome, Gerente, Departamento Superior"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Clearable="true"
+                      OnClearButtonClick="@(() => SearchTerm = "")"
+                      Immediate="true"
+                      IconSize="Size.Medium"
+                      Class="mt-0">
+        </MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="Nome" />
+        <PropertyColumn Property="x => x.Name" Title="Nome" />
+        <PropertyColumn Property="x => x.Cpf" Title="CPF" />
+        <PropertyColumn Property="x => x.Rg" Title="RG" />
+        <PropertyColumn Property="x => x.Department" Title="Departamento" />
+        <TemplateColumn Class="justify-end" Title="Ações">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Href="@($"/colaboradores/editar/{context.Item.Id}")"
+                                       Color="Color.Primary">
+                        </MudIconButton>
+                    </MudTooltip>
+                    <MudTooltip Text="Excluir">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       OnClick="() => OnDeleteButtonClickedAsync(context.Item.Id, context.Item.Name)">
+                        </MudIconButton>
+                    </MudTooltip>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CollaboratorDto" />
+    </PagerContent>
+</MudDataGrid>

@@ -113,6 +113,21 @@ public static class DepartmentExtensions
         return requests;
     }
 
+    public static IEnumerable<DepartmentDto> ToDto(this IEnumerable<DepartmentResponse> response)
+    {
+        var dtos = new List<DepartmentDto>();
+        foreach (var department in response)
+        {
+            var item = new DepartmentDto
+            {
+                Id = department.Id,
+                Name = department.Name
+            };
+            dtos.Add(item);
+        }
+        return dtos;
+    }
+
     public static Department ToEntity(this UpdateDepartmentRequest request)
     {
         return new Department

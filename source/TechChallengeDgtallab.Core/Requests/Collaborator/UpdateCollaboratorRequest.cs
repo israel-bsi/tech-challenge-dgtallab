@@ -16,7 +16,7 @@ public class UpdateCollaboratorRequest
     [Range(1, int.MaxValue, ErrorMessage = "O Departamento é obrigatório")]
     public int DepartmentId { get; set; }
 
-    public UpdateDepartmentRequest? Department { get; set; }
+    public DepartmentDto? Department { get; set; }
     public string? Rg { get; set; }
 
     public override string ToString() => Name;

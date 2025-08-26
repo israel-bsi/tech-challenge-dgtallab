@@ -100,8 +100,17 @@ public class DepartmentRepository : IDepartmentRepository
             .Include(c => c.Manager)
             .Include(c => c.SuperiorDepartment)
             .AsNoTracking()
-            .Where(d => d.IsActive)
-            .OrderByDescending(d => d.CreatedAt);
+            .Where(d => d.IsActive);
+
+        if (!string.IsNullOrEmpty(request.SearchTerm))
+        {
+            var lowCase = request.SearchTerm.ToLower();
+            query = query.Where(d => d.Name.ToLower().Contains(lowCase) ||
+                                     (d.Manager != null && d.Manager.Name.ToLower().Contains(lowCase)) ||
+                                     (d.SuperiorDepartment != null && d.SuperiorDepartment.Name.ToLower().Contains(lowCase)));
+        }
+
+        query = query.OrderByDescending(d => d.CreatedAt);
 
         var count = await query.CountAsync();
 

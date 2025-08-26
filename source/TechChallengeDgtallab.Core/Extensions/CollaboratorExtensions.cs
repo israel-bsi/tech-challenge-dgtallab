@@ -58,7 +58,7 @@ public static class CollaboratorExtensions
                 Rg = collaborator.Rg,
                 DepartmentId = collaborator.Department?.Id ?? 0,
                 Department = collaborator.Department is not null
-                    ? new UpdateDepartmentRequest
+                    ? new DepartmentDto
                     {
                         Id = collaborator.Department.Id,
                         Name = collaborator.Department.Name
@@ -68,6 +68,19 @@ public static class CollaboratorExtensions
             requests.Add(request);
         }
         return requests;
+    }
+
+    public static CollaboratorDto ToDto(this CollaboratorResponse response)
+    {
+        return new CollaboratorDto
+        {
+            Id = response.Id,
+            Name = response.Name,
+            Cpf = response.Cpf,
+            Rg = response.Rg ?? string.Empty,
+            DepartmentId = response.Department?.Id ?? 0,
+            Department = response.Department?.Name ?? string.Empty
+        };
     }
 
     public static Collaborator ToEntity(this UpdateCollaboratorRequest request)

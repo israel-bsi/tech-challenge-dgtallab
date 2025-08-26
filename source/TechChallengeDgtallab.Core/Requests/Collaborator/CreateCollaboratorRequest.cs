@@ -5,7 +5,6 @@ namespace TechChallengeDgtallab.Core.Requests.Collaborator;
 
 public class CreateCollaboratorRequest
 {
-    public int Id { get; set; }
 
     [Required(ErrorMessage = "O Nome é obrigatório")]
     public string Name { get; set; } = string.Empty;
@@ -16,6 +15,6 @@ public class CreateCollaboratorRequest
     [Range(1, int.MaxValue, ErrorMessage = "O Departamento é obrigatório")]
     public int DepartmentId { get; set; }
 
-    public CreateDepartmentRequest Department { get; set; } = new();
+    public DepartmentDto Department { get; set; } = new();
     public string? Rg { get; set; }
 }

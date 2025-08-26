@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
 using TechChallengeDgtallab.Core.Requests.Collaborator;
@@ -18,56 +19,53 @@ namespace TechChallengeDgtallab.Web.Handlers
         {
             var result = await _httpClient.PostAsJsonAsync("/api/v1/collaborators", request);
 
-            return await result.Content.ReadFromJsonAsync<Response<CollaboratorResponse>>()
-                   ?? new Response<CollaboratorResponse>(null, 400, "Erro ao criar o colaborador");
+            return await result.ProcessResponseAsync<CollaboratorResponse>();
         }
 
         public async Task<Response<CollaboratorResponse>> UpdateAsync(UpdateCollaboratorRequest request)
         {
-            var result = await _httpClient.PutAsJsonAsync("/api/v1/collaborators", request);
+            var result = await _httpClient.PutAsJsonAsync($"/api/v1/collaborators/{request.Id}", request);
 
-            return await result.Content.ReadFromJsonAsync<Response<CollaboratorResponse>>()
-                   ?? new Response<CollaboratorResponse>(null, 400, "Erro ao atualizar o colaborador");
+            return await result.ProcessResponseAsync<CollaboratorResponse>();
         }
 
         public async Task<Response<CollaboratorResponse>> DeleteAsync(int id)
         {
             var result = await _httpClient.DeleteAsync($"/api/v1/collaborators/{id}");
 
-            return await result.Content.ReadFromJsonAsync<Response<CollaboratorResponse>>()
-                   ?? new Response<CollaboratorResponse>(null, 400, "Erro ao deletar o colaborador");
+            return await result.ProcessResponseAsync<CollaboratorResponse>();
         }
 
         public async Task<Response<CollaboratorResponse>> GetByIdAsync(int id)
         {
             var result = await _httpClient.GetAsync($"/api/v1/collaborators/{id}");
 
-            return await result.Content.ReadFromJsonAsync<Response<CollaboratorResponse>>()
-                   ?? new Response<CollaboratorResponse>(null, 400, "Erro ao obter o colaborador");
+            return await result.ProcessResponseAsync<CollaboratorResponse>();
         }
 
         public async Task<Response<IEnumerable<CollaboratorResponse>>> GetSubordinatesAsync(int managerId)
         {
             var result = await _httpClient.GetAsync($"/api/v1/collaborators/subordinates/{managerId}");
 
-            return await result.Content.ReadFromJsonAsync<Response<IEnumerable<CollaboratorResponse>>>()
-                   ?? new Response<IEnumerable<CollaboratorResponse>>(null, 400, "Erro ao obter os subordinados");
+            return await result.ProcessResponseAsync<IEnumerable<CollaboratorResponse>>();
         }
 
         public async Task<Response<IEnumerable<CollaboratorResponse>>> GetCollaboratorsByDepartment(int departmentId)
         {
             var result = await _httpClient.GetAsync($"/api/v1/collaborators/department/{departmentId}");
 
-            return await result.Content.ReadFromJsonAsync<Response<IEnumerable<CollaboratorResponse>>>()
-                   ?? new Response<IEnumerable<CollaboratorResponse>>(null, 400, "Erro ao obter os colaboradores do departamento");
+            return await result.ProcessResponseAsync<IEnumerable<CollaboratorResponse>>();
         }
 
         public async Task<PagedResponse<IEnumerable<CollaboratorResponse>>> GetAllAsync(PagedRequest request)
         {
             var url = $"/api/v1/collaborators?pageNumber={request.PageNumber}&pageSize={request.PageSize}";
 
-            return await _httpClient.GetFromJsonAsync<PagedResponse<IEnumerable<CollaboratorResponse>>>(url)
-                   ?? new PagedResponse<IEnumerable<CollaboratorResponse>>(null, 400, "Erro ao obter os colaboradores");
+            if(!string.IsNullOrEmpty(request.SearchTerm))
+                url += $"&searchTerm={request.SearchTerm}";
+
+            var result = await _httpClient.GetAsync(url);
+            return await result.ProcessPagedResponseAsync<IEnumerable<CollaboratorResponse>>();
         }
     }
 }
