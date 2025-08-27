@@ -9,7 +9,7 @@ Projeto criado como teste técnico para a DGTallab. A solução contém:
 ## Requisitos
 
 - .NET SDK 9.0
-- PostgreSQL (recomendado 14+)
+- PostgreSQL 17
 - Acesso para criar/alterar banco (usuário e senha)
 
 ## Banco de dados
