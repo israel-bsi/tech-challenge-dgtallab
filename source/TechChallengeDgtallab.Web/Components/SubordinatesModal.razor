@@ -1,0 +1,152 @@
+﻿@inherits SubordinatesModalBase
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.Group" Class="me-2" />
+            Subordinados do gerente @ManagerName
+        </MudText>
+        
+        @if (IsLoading)
+        {
+            <div class="d-flex justify-center align-center" style="min-height: 300px;">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+            </div>
+        }
+        else if (Subordinates?.Any() == true)
+        {
+            <MudTable Items="Subordinates" 
+                      Dense="false" 
+                      Hover="true" 
+                      Striped="true"
+                      FixedHeader="true"
+                      Height="400px"
+                      Class="mud-table-striped">
+                <HeaderContent>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" Class="me-2" Size="Size.Small" />
+                        Nome
+                    </MudTh>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Badge" Class="me-2" Size="Size.Small" />
+                        CPF
+                    </MudTh>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.ContactPage" Class="me-2" Size="Size.Small" />
+                        RG
+                    </MudTh>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Business" Class="me-2" Size="Size.Small" />
+                        Departamento
+                    </MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Nome" Style="padding: 16px;">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" 
+                                   Color="Color.Primary" 
+                                   Size="Size.Small" 
+                                   Class="me-2" />
+                            <MudText Typo="Typo.body2">@context.Name</MudText>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="CPF" Style="padding: 16px;">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Badge" 
+                                   Color="Color.Success" 
+                                   Size="Size.Small" 
+                                   Class="me-2" />
+                            <MudText Typo="Typo.body2">@context.Cpf</MudText>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="RG" Style="padding: 16px;">
+                        @if (!string.IsNullOrEmpty(context.Rg))
+                        {
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.ContactPage" 
+                                       Color="Color.Info" 
+                                       Size="Size.Small" 
+                                       Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Rg</MudText>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.RemoveCircleOutline" 
+                                       Size="Size.Small" 
+                                       Class="me-2 mud-text-secondary" />
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">Não informado</MudText>
+                            </div>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Departamento" Style="padding: 16px;">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Business" 
+                                   Color="Color.Secondary" 
+                                   Size="Size.Small" 
+                                   Class="me-2" />
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@context.Department</MudText>
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+            
+            <MudGrid Class="mt-4">
+                <MudItem xs="12" sm="4">
+                    <MudCard Elevation="3">
+                        <MudCardContent Class="text-center pa-4">
+                            <MudIcon Icon="@Icons.Material.Filled.Group" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                            <MudText Typo="Typo.h5" Color="Color.Primary">@Subordinates.Count()</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Total de Subordinados</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudCard Elevation="3">
+                        <MudCardContent Class="text-center pa-4">
+                            <MudIcon Icon="@Icons.Material.Filled.Business" Color="Color.Success" Size="Size.Large" Class="mb-2" />
+                            <MudText Typo="Typo.h5" Color="Color.Success">@Subordinates.Select(s => s.Department).Distinct().Count()</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Departamentos</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudCard Elevation="3">
+                        <MudCardContent Class="text-center pa-4">
+                            <MudIcon Icon="@Icons.Material.Filled.ContactPage" Color="Color.Info" Size="Size.Large" Class="mb-2" />
+                            <MudText Typo="Typo.h5" Color="Color.Info">@Subordinates.Count(s => !string.IsNullOrEmpty(s.Rg))</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Com RG</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-2" />
+        }
+        else
+        {
+            <div class="d-flex flex-column justify-center align-center" style="min-height: 300px;">
+                <MudIcon Icon="@Icons.Material.Filled.Group" Size="Size.Large" Class="mb-2 mud-text-secondary" />
+                <MudText Typo="Typo.h6" Class="mud-text-secondary mb-2">
+                    Nenhum subordinado encontrado
+                </MudText>
+                <MudText Typo="Typo.body1" Class="mud-text-secondary text-center">
+                    Este colaborador não possui subordinados em sua hierarquia ou não é um gerente.
+                </MudText>
+            </div>
+        }
+        
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-3">
+                @ErrorMessage
+            </MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Close">
+            Fechar
+        </MudButton>
+    </DialogActions>
+</MudDialog>

@@ -1,0 +1,156 @@
+﻿@inherits DepartmentHierarchyModalBase
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.AccountTree" Class="me-2" />
+            Hierarquia de Departamentos - @DepartmentName
+        </MudText>
+        
+        @if (IsLoading)
+        {
+            <div class="d-flex justify-center align-center" style="min-height: 300px;">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+            </div>
+        }
+        else if (HierarchyDepartments?.Any() == true)
+        {
+            <MudTable Items="HierarchyDepartments" 
+                      Dense="false" 
+                      Hover="true" 
+                      Striped="true"
+                      FixedHeader="true"
+                      Height="400px"
+                      Class="mud-table-striped">
+                <HeaderContent>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Business" Class="me-2" Size="Size.Small" />
+                        Departamento
+                    </MudTh>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" Class="me-2" Size="Size.Small" />
+                        Gerente
+                    </MudTh>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.BusinessCenter" Class="me-2" Size="Size.Small" />
+                        Departamento Superior
+                    </MudTh>
+                    <MudTh Style="padding: 16px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Layers" Class="me-2" Size="Size.Small" />
+                        Nível Hierárquico
+                    </MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Departamento" Style="padding: 16px;">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@GetDepartmentIcon(context)" 
+                                   Color="@GetDepartmentIconColor(context)" 
+                                   Size="Size.Small" 
+                                   Class="me-2" />
+                            <span style="@(context.Id == DepartmentId ? "font-weight: bold; color: var(--mud-palette-primary);" : "")">@context.Name</span>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="Gerente" Style="padding: 16px;">
+                        @if (!string.IsNullOrEmpty(context.Manager))
+                        {
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" Color="Color.Success" Class="me-2" />
+                                <MudText Typo="Typo.body2" Color="Color.Success">@context.Manager</MudText>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.PersonOff" Size="Size.Small" Class="me-2 mud-text-secondary" />
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">Sem gerente</MudText>
+                            </div>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Departamento Superior" Style="padding: 16px;">
+                        @if (!string.IsNullOrEmpty(context.SuperiorDepartment))
+                        {
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Color="Color.Primary" Class="me-2" />
+                                <MudText Typo="Typo.body2" Color="Color.Primary">@context.SuperiorDepartment</MudText>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Color="Color.Warning" Class="me-2" />
+                                <MudText Typo="Typo.body2" Color="Color.Warning">Departamento raiz</MudText>
+                            </div>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Nível Hierárquico" Style="padding: 16px;">
+                        <div class="d-flex align-center">
+                            <MudBadge Content="@GetDepartmentLevel(context)" 
+                                    Color="Color.Info" 
+                                    Dot="false" 
+                                    Class="me-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Layers" Size="Size.Small" />
+                            </MudBadge>
+                            <MudText Typo="Typo.body2">Nível @GetDepartmentLevel(context)</MudText>
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+            
+            <MudGrid Class="mt-4">
+                <MudItem xs="12" sm="4">
+                    <MudCard Elevation="3">
+                        <MudCardContent Class="text-center pa-4">
+                            <MudIcon Icon="@Icons.Material.Filled.AccountTree" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                            <MudText Typo="Typo.h5" Color="Color.Primary">@HierarchyDepartments.Count()</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Total de Departamentos</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudCard Elevation="3">
+                        <MudCardContent Class="text-center pa-4">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Success" Size="Size.Large" Class="mb-2" />
+                            <MudText Typo="Typo.h5" Color="Color.Success">@HierarchyDepartments.Count(d => !string.IsNullOrEmpty(d.Manager))</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Com Gerente</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudCard Elevation="3">
+                        <MudCardContent Class="text-center pa-4">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Info" Size="Size.Large" Class="mb-2" />
+                            <MudText Typo="Typo.h5" Color="Color.Info">@(GetMaxLevel() + 1)</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Níveis Hierárquicos</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-2" />
+        }
+        else
+        {
+            <div class="d-flex flex-column justify-center align-center" style="min-height: 300px;">
+                <MudIcon Icon="@Icons.Material.Filled.AccountTree" Size="Size.Large" Class="mb-2 mud-text-secondary" />
+                <MudText Typo="Typo.h6" Class="mud-text-secondary mb-2">
+                    Departamento sem subordinados
+                </MudText>
+                <MudText Typo="Typo.body1" Class="mud-text-secondary text-center">
+                    Este departamento não possui departamentos subordinados em sua hierarquia.
+                </MudText>
+            </div>
+        }
+        
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-3">
+                @ErrorMessage
+            </MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Close">
+            Fechar
+        </MudButton>
+    </DialogActions>
+</MudDialog>

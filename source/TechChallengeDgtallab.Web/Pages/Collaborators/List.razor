@@ -21,7 +21,7 @@
              @ref="DataGrid"
              RowsPerPage="@Core.Configuration.DefaultPageSize">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Projetos</MudText>
+        <MudText Typo="Typo.h6">Colaboradores</MudText>
         <MudSpacer />
         <MudSelect T="FilterOption"
                    Label="Selecione o filtro"
@@ -58,19 +58,21 @@
 
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.Id" Title="Nome" />
+        <PropertyColumn Property="x => x.Id" Title="ID" />
         <PropertyColumn Property="x => x.Name" Title="Nome" />
         <PropertyColumn Property="x => x.Cpf" Title="CPF" />
         <PropertyColumn Property="x => x.Rg" Title="RG" />
         <PropertyColumn Property="x => x.Department" Title="Departamento" />
-        <TemplateColumn Title="Gerente">
-            <CellTemplate>
-                @context.Item.Manager
-            </CellTemplate>
-        </TemplateColumn>
+        <PropertyColumn Property="x => x.Manager" Title="Gerente" />
         <TemplateColumn Class="justify-end" Title="Ações">
             <CellTemplate>
                 <MudStack Row>
+                    <MudTooltip Text="Ver Subordinados">
+                        <MudIconButton Icon="@Icons.Material.Filled.Group"
+                                       Color="Color.Info"
+                                       OnClick="@CreateSubordinatesClickHandler(context.Item.Id, context.Item.Name)">
+                        </MudIconButton>
+                    </MudTooltip>
                     <MudTooltip Text="Editar">
                         <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                        Href="@($"/colaboradores/editar/{context.Item.Id}")"
@@ -80,7 +82,7 @@
                     <MudTooltip Text="Excluir">
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                        Color="Color.Error"
-                                       OnClick="() => OnDeleteButtonClickedAsync(context.Item.Id, context.Item.Name)">
+                                       OnClick="@CreateDeleteClickHandler(context.Item.Id, context.Item.Name)">
                         </MudIconButton>
                     </MudTooltip>
                 </MudStack>

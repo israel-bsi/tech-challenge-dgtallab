@@ -69,6 +69,28 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
             }
         }
 
+        public async Task ShowHierarchyModalAsync(int departmentId, string departmentName)
+        {
+            var parameters = new DialogParameters
+            {
+                { "DepartmentId", departmentId },
+                { "DepartmentName", departmentName }
+            };
+
+            var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.ExtraLarge,
+                FullWidth = true,
+                CloseOnEscapeKey = true
+            };
+
+            await DialogService.ShowAsync<DepartmentHierarchyModal>(
+                "Hierarquia de Departamentos", 
+                parameters, 
+                options);
+        }
+
         public async Task OnDeleteButtonClickedAsync(int id, string name)
         {
             var parameters = new DialogParameters

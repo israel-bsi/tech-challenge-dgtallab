@@ -21,7 +21,7 @@
              @ref="DataGrid"
              RowsPerPage="@Core.Configuration.DefaultPageSize">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Projetos</MudText>
+        <MudText Typo="Typo.h6">Departamentos</MudText>
         <MudSpacer />
         <MudSelect T="FilterOption"
                    Label="Selecione o filtro"
@@ -60,11 +60,7 @@
     <Columns>
         <PropertyColumn Property="x => x.Id" Title="Id" />
         <PropertyColumn Property="x => x.Name" Title="Nome" />
-        <TemplateColumn Title="Gerente">
-            <CellTemplate>
-                @context.Item.Manager
-            </CellTemplate>
-        </TemplateColumn>
+        <PropertyColumn Property="x => x.Manager" Title="Gerente" />
         <TemplateColumn Title="Departamento Superior">
             <CellTemplate>
                 @context.Item.SuperiorDepartment
@@ -73,6 +69,12 @@
         <TemplateColumn Class="justify-end" Title="Ações">
             <CellTemplate>
                 <MudStack Row>
+                    <MudTooltip Text="Ver Hierarquia">
+                        <MudIconButton Icon="@Icons.Material.Filled.AccountTree"
+                                       Color="Color.Info"
+                                       @onclick="@(() => ShowHierarchyModalAsync(context.Item.Id, context.Item.Name))">
+                        </MudIconButton>
+                    </MudTooltip>
                     <MudTooltip Text="Editar">
                         <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                        Href="@($"/departamentos/editar/{context.Item.Id}")"
@@ -82,7 +84,7 @@
                     <MudTooltip Text="Excluir">
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                        Color="Color.Error"
-                                       OnClick="() => OnDeleteButtonClickedAsync(context.Item.Id, context.Item.Name)">
+                                       @onclick="@(() => OnDeleteButtonClickedAsync(context.Item.Id, context.Item.Name))">
                         </MudIconButton>
                     </MudTooltip>
                 </MudStack>

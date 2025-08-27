@@ -69,6 +69,44 @@ public class ListCollaboratorPage : ComponentBase
         }
     }
 
+    public EventCallback CreateSubordinatesClickHandler(int managerId, string managerName)
+    {
+        return EventCallback.Factory.Create(this, async () =>
+        {
+            await ShowSubordinatesModalAsync(managerId, managerName);
+        });
+    }
+
+    public EventCallback CreateDeleteClickHandler(int id, string name)
+    {
+        return EventCallback.Factory.Create(this, async () =>
+        {
+            await OnDeleteButtonClickedAsync(id, name);
+        });
+    }
+
+    private async Task ShowSubordinatesModalAsync(int managerId, string managerName)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ManagerId", managerId },
+            { "ManagerName", managerName }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Large,
+            FullWidth = true,
+            CloseOnEscapeKey = true
+        };
+
+        await DialogService.ShowAsync<SubordinatesModal>(
+            "Subordinados", 
+            parameters, 
+            options);
+    }
+
     public async Task OnDeleteButtonClickedAsync(int id, string name)
     {
         var parameters = new DialogParameters
