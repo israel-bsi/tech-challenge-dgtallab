@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TechChallengeDgtallab.ApiService.Extensions;
+using TechChallengeDgtallab.Core;
 using TechChallengeDgtallab.Core.Handler;
 using TechChallengeDgtallab.Core.Requests;
 using TechChallengeDgtallab.Core.Requests.Department;
@@ -101,11 +102,22 @@ public class DepartmentController : ControllerBase
     [ProducesResponseType(typeof(PagedResponse<IEnumerable<DepartmentResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ErrorData), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> GetAllAsync([FromQuery] PagedRequest request)
+    public async Task<ActionResult> GetAllAsync(
+        [FromQuery] int pageNumber = Configuration.DefaultPageNumber,
+        [FromQuery] int pageSize = Configuration.DefaultPageSize,
+        [FromQuery] string searchTerm = "",
+        [FromQuery] string filterBy = "")
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState.CreateErrorResponse());
 
+        var request = new PagedRequest
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            FilterBy = filterBy,
+            SearchTerm = searchTerm
+        };
         var response = await _handler.GetAllAsync(request);
 
         return response.IsSuccess

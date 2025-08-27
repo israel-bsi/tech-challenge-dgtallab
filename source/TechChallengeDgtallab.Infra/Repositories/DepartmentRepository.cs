@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Models;
 using TechChallengeDgtallab.Core.Repositories;
 using TechChallengeDgtallab.Core.Requests;
@@ -45,7 +46,7 @@ public class DepartmentRepository : IDepartmentRepository
 
         if (readOnly)
             query = query.AsNoTracking();
-        
+
         var department = await query.FirstOrDefaultAsync();
 
         return new Response<Department>(department);
@@ -92,19 +93,13 @@ public class DepartmentRepository : IDepartmentRepository
             .AsNoTracking()
             .Where(d => d.IsActive);
 
-        if (!string.IsNullOrEmpty(request.SearchTerm))
-        {
-            var lowCase = request.SearchTerm.ToLower();
-            query = query.Where(d => d.Name.ToLower().Contains(lowCase) ||
-                                     (d.Manager != null && d.Manager.Name.ToLower().Contains(lowCase)) ||
-                                     (d.SuperiorDepartment != null && d.SuperiorDepartment.Name.ToLower().Contains(lowCase)));
-        }
-
-        query = query.OrderByDescending(d => d.CreatedAt);
+        if (!string.IsNullOrEmpty(request.FilterBy))
+            query = query.FilterByProperty(request.SearchTerm, request.FilterBy);
 
         var count = await query.CountAsync();
 
         var departments = await query
+            .OrderByDescending(d => d.CreatedAt)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync();

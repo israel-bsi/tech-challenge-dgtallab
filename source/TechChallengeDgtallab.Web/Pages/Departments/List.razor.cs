@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 using TechChallengeDgtallab.Core.DTOs;
 using TechChallengeDgtallab.Core.Extensions;
@@ -12,18 +13,15 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
     {
         public MudDataGrid<DepartmentDto> DataGrid { get; set; } = null!;
 
-        private string _searchTerm = string.Empty;
+        public string SearchTerm { get; set; } = string.Empty;
+        public FilterOption SelectedFilter { get; set; } = new();
 
-        public string SearchTerm
-        {
-            get => _searchTerm;
-            set
-            {
-                if (_searchTerm == value) return;
-                _searchTerm = value;
-                _ = DataGrid.ReloadServerData();
-            }
-        }
+        public readonly List<FilterOption> FilterOptions =
+        [
+            new() { DisplayName = "Nome", PropertyName = "Name" },
+            new() { DisplayName = "Gerente", PropertyName = "Manager.Name" },
+            new() { DisplayName = "Departamento Superior", PropertyName = "SuperiorDepartment.Name" }
+        ];
 
         [Inject] public ISnackbar Snackbar { get; set; } = null!;
 
@@ -39,7 +37,8 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
                 {
                     PageNumber = state.Page + 1,
                     PageSize = state.PageSize,
-                    SearchTerm = SearchTerm
+                    SearchTerm = SearchTerm,
+                    FilterBy = SelectedFilter.PropertyName
                 };
 
                 var response = await Handler.GetAllAsync(request);
@@ -107,6 +106,19 @@ namespace TechChallengeDgtallab.Web.Pages.Departments
             {
                 Snackbar.Add(e.Message, Severity.Error);
             }
+        }
+
+        public void OnValueFilterChanged(FilterOption newValue)
+        {
+            SelectedFilter = newValue;
+        }
+        public void OnButtonSearchClick() => DataGrid.ReloadServerData();
+
+        public void OnClearSearchClick()
+        {
+            SearchTerm = string.Empty;
+            SelectedFilter = new FilterOption();
+            DataGrid.ReloadServerData();
         }
     }
 }

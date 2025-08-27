@@ -64,6 +64,9 @@ namespace TechChallengeDgtallab.Web.Handlers
             if(!string.IsNullOrEmpty(request.SearchTerm))
                 url += $"&searchTerm={request.SearchTerm}";
 
+            if(!string.IsNullOrEmpty(request.FilterBy))
+                url += $"&filterBy={request.FilterBy}";
+
             var result = await _httpClient.GetAsync(url);
             return await result.ProcessPagedResponseAsync<IEnumerable<CollaboratorResponse>>();
         }

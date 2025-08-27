@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TechChallengeDgtallab.Core.Extensions;
 using TechChallengeDgtallab.Core.Models;
 using TechChallengeDgtallab.Core.Repositories;
 using TechChallengeDgtallab.Core.Requests;
@@ -98,12 +99,15 @@ public class CollaboratorsRepository : ICollaboratorRepository
             .Include(c => c.Department)
             .ThenInclude(d => d.Manager)
             .AsNoTracking()
-            .Where(c => c.IsActive)
-            .OrderByDescending(c => c.CreatedAt);
+            .Where(c => c.IsActive);
+
+        if (!string.IsNullOrEmpty(request.FilterBy))
+            query = query.FilterByProperty(request.SearchTerm, request.FilterBy);
 
         var count = await query.CountAsync();
 
         var collaborators = await query
+            .OrderByDescending(c => c.CreatedAt)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync();
